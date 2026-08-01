@@ -4,7 +4,7 @@ describe('Stats Repository Logic', () => {
 
   it('harus menghitung batas XP yang dibutuhkan untuk level saat ini', () => {
     // Pengguna level 1 harus mengumpulkan 100 XP untuk naik ke level 2
-    expect(getXpToNextLevel(1)).toBe(99);
+    expect(getXpToNextLevel(1)).toBe(100);
 
     // Pengguna level 5 harus mengumpulkan 500 XP untuk naik ke level 6
     expect(getXpToNextLevel(5)).toBe(500);
