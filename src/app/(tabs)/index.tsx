@@ -15,7 +15,14 @@ import {
 import { Spacing, Typography, Radius, CATEGORY_COLORS, ClayShadow } from '@/constants/design';
 import { useThemeContext } from '@/context/theme-context';
 import { Task, StatCategory, RecurrenceType } from '@/db/schema';
-import { getAllTasks, createTask, toggleTask, deleteTask, archiveTask } from '@/db/repositories/task-repository';
+import {
+  getAllTasks,
+  createTask,
+  toggleTask,
+  deleteTask,
+  archiveTask,
+  unarchiveTask
+} from '@/db/repositories/task-repository';
 import { addXp, removeXp, logActivity, removeActivity } from '@/db/repositories/stats-repository';
 import { BottomSheet } from '@/components/ui/BottomSheet';
 import { InputField } from '@/components/ui/InputField';
@@ -55,6 +62,20 @@ export default function TasksScreen() {
   const [expandedTasks, setExpandedTasks] = useState<number[]>([]);
   const [newStartDate, setNewStartDate] = useState<string | null>(null);
   const [newDeadline, setNewDeadline] = useState<string | null>(null);
+
+  // Archive Modal State
+  const [archiveModalVisible, setArchiveModalVisible] = useState(false);
+  const [taskToArchive, setTaskToArchive] = useState<number | null>(null);
+
+  const resetFormState = (parentId: number | null = null) => {
+    setNewTitle('');
+    setNewCategories(['Productivity']);
+    setNewRecurrence('once');
+    setNewDays([]);
+    setNewStartDate(null);
+    setNewDeadline(null);
+    setParentTaskId(parentId);
+  };
 
   const loadTasks = useCallback(async () => {
     const result = await getAllTasks();
@@ -106,6 +127,16 @@ export default function TasksScreen() {
   const handleToggle = async (task: Task) => {
     if (task.is_system) {
       Alert.alert('System Quest', 'This is an automatic daily quest. Edit your budget in the Money tab.');
+      return;
+    }
+    
+    if (task.status === 'archived') {
+      try {
+        await unarchiveTask(task.id);
+        loadTasks();
+      } catch (e: any) {
+        Alert.alert('Error', 'Failed to unarchive task.');
+      }
       return;
     }
     
@@ -223,7 +254,10 @@ export default function TasksScreen() {
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.addBtn, ClayShadow.button, { backgroundColor: colors.accent }]}
-            onPress={() => setShowSheet(true)}
+            onPress={() => {
+              resetFormState(null);
+              setShowSheet(true);
+            }}
             activeOpacity={0.75}
           >
             <Plus color={colors.white} size={20} />
@@ -291,29 +325,8 @@ export default function TasksScreen() {
     }
 
     const handleSwipeArchive = () => {
-      if (Platform.OS === 'web') {
-        const confirmed = window.confirm('Archive Task\n\nAre you sure you want to archive this task? Subtasks will also be archived.');
-        if (confirmed) {
-          archiveTask(item.id).then(() => loadTasks());
-        }
-        return;
-      }
-
-      Alert.alert(
-        'Archive Task',
-        'Are you sure you want to archive this task? Subtasks will also be archived.',
-        [
-          { text: 'Cancel', style: 'cancel' },
-          { 
-            text: 'Archive', 
-            style: 'destructive',
-            onPress: async () => {
-              await archiveTask(item.id);
-              loadTasks();
-            }
-          }
-        ]
-      );
+      setTaskToArchive(item.id);
+      setArchiveModalVisible(true);
     };
 
     const renderRightActions = (progress: Animated.AnimatedInterpolation<number>, dragX: Animated.AnimatedInterpolation<number>) => {
@@ -387,12 +400,7 @@ export default function TasksScreen() {
               <View>
                 <View style={{ flexDirection: 'row', alignItems: 'flex-start' }}>
                   <TouchableOpacity
-                    style={[
-                      styles.checkCol,
-                      isCompleted && { backgroundColor: colors.mint, borderColor: colors.mint },
-                      isFailed && { backgroundColor: colors.coral, borderColor: colors.coral },
-                      isArchived && { backgroundColor: colors.surfaceHigh, borderColor: colors.border },
-                    ]}
+                    style={styles.checkCol}
                     onPress={() => !isCompleted && item.status !== 'done' && handleToggle(item)}
                     disabled={isCompleted || item.status === 'done'}
                     activeOpacity={0.7}
@@ -403,7 +411,7 @@ export default function TasksScreen() {
                     ) : isFailed ? (
                       <XCircle color={colors.coral} size={22} />
                     ) : isArchived ? (
-                      <Archive color={colors.textMuted} size={22} />
+                      <Archive color={colors.purple} size={22} />
                     ) : (
                       <Circle color={overdueDays > 0 ? colors.coral : colors.textMuted} size={22} />
                     )}
@@ -480,7 +488,10 @@ export default function TasksScreen() {
                     ) : <View />}
                     
                     <TouchableOpacity 
-                      onPress={() => handleAddSubtask(item)}
+                      onPress={() => {
+                        resetFormState(item.id);
+                        setShowSheet(true);
+                      }}
                       style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surfaceHigh, paddingHorizontal: 12, paddingVertical: 6, borderRadius: Radius.full }}
                     >
                       <Plus color={colors.accent} size={14} />
@@ -506,6 +517,43 @@ export default function TasksScreen() {
         contentContainerStyle={styles.list}
         showsVerticalScrollIndicator={false}
       />
+      
+      <BottomSheet
+        visible={archiveModalVisible}
+        onClose={() => {
+          setArchiveModalVisible(false);
+          setTaskToArchive(null);
+        }}
+        title="Archive Task"
+      >
+        <Text style={{ ...Typography.body, color: colors.textSecondary, marginBottom: Spacing.xl }}>
+          Are you sure you want to archive this task? Subtasks will also be archived.
+        </Text>
+        <View style={{ gap: Spacing.md }}>
+          <Button
+            title="Yes, Archive Task"
+            onPress={async () => {
+              if (taskToArchive) {
+                await archiveTask(taskToArchive);
+                loadTasks();
+              }
+              setArchiveModalVisible(false);
+              setTaskToArchive(null);
+            }}
+            variant="danger"
+            size="lg"
+          />
+          <Button
+            title="Cancel"
+            onPress={() => {
+              setArchiveModalVisible(false);
+              setTaskToArchive(null);
+            }}
+            variant="secondary"
+            size="lg"
+          />
+        </View>
+      </BottomSheet>
 
       <BottomSheet visible={showSheet} onClose={() => setShowSheet(false)} title="New Task">
         <InputField
@@ -529,12 +577,17 @@ export default function TasksScreen() {
               return (
                 <View>
                   <Text style={{ ...Typography.caption, color: colors.textSecondary, marginBottom: 8 }}>
-                    Subtask deadline is synced with its parent task.
+                    Subtask schedule must be within its parent task's schedule.
                   </Text>
                   <DatePicker
                     startDate={newStartDate}
                     endDate={newDeadline}
-                    onSelect={() => {}} // Disabled
+                    minDate={parentTask.start_date}
+                    maxDate={parentTask.deadline}
+                    onSelect={(start, end) => {
+                      setNewStartDate(start);
+                      setNewDeadline(end);
+                    }}
                   />
                 </View>
               );

@@ -77,6 +77,15 @@ export async function archiveTask(id: number): Promise<void> {
   await db.runAsync("UPDATE tasks SET status = 'archived', completed_at = datetime('now') WHERE id = ? OR parent_id = ?", id, id);
 }
 
+export async function unarchiveTask(id: number): Promise<void> {
+  const db = await getDatabase();
+  await db.runAsync(`
+    UPDATE tasks 
+    SET status = CASE WHEN completed = 1 THEN 'done' ELSE 'active' END
+    WHERE id = ? OR parent_id = ?
+  `, id, id);
+}
+
 export async function cleanUpArchivedTasks(): Promise<void> {
   const db = await getDatabase();
   // Delete archived tasks that were archived more than 7 days ago

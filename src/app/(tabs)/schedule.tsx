@@ -396,6 +396,10 @@ const styles = StyleSheet.create({
     borderRadius: Radius.lg,
     overflow: 'hidden',
   },
+  xpText: {
+    ...Typography.caption,
+    fontWeight: '600',
+  },
   ganttBody: {
     minHeight: 60,
     marginBottom: Spacing.md,
