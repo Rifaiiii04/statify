@@ -540,12 +540,41 @@ export default function TasksScreen() {
               );
             }
             if (parentTask.recurrence === 'specific_days') {
+              let parsedDays: number[] = [];
+              try {
+                parsedDays = JSON.parse(parentTask.recurrence_days || '[]');
+              } catch {}
+              
               return (
-                <View>
+                <>
                   <Text style={{ ...Typography.caption, color: colors.textSecondary, marginBottom: 8 }}>
-                    Subtask inherits parent's specific days schedule.
+                    Subtask must inherit specific days, or be 'Once' on those days.
                   </Text>
-                </View>
+                  {!newStartDate && (
+                    <RecurrencePicker
+                      recurrence={newRecurrence}
+                      onRecurrenceChange={(r) => { setNewRecurrence(r); setNewStartDate(null); setNewDeadline(null); }}
+                      selectedDays={newDays}
+                      onSelectedDaysChange={setNewDays}
+                      allowedOptions={['once', 'specific_days']}
+                      allowedWeekdays={parsedDays}
+                    />
+                  )}
+                  {newRecurrence === 'once' && (
+                    <DatePicker
+                      startDate={newStartDate}
+                      endDate={newDeadline}
+                      onSelect={(start, end) => {
+                        setNewStartDate(start);
+                        setNewDeadline(end);
+                        if (start) {
+                          setNewDays([]);
+                        }
+                      }}
+                      allowedWeekdays={parsedDays}
+                    />
+                  )}
+                </>
               );
             }
             if (parentTask.recurrence === 'once') {
@@ -646,8 +675,6 @@ const styles = StyleSheet.create({
   },
   emptyText: { ...Typography.body, textAlign: 'center' },
   taskCard: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
     borderRadius: Radius.lg,
     padding: Spacing.md,
   },

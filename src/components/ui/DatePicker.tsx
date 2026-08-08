@@ -11,6 +11,7 @@ interface DatePickerProps {
   label?: string;
   minDate?: string | null;
   maxDate?: string | null;
+  allowedWeekdays?: number[]; // 0 for Sunday, 1 for Monday, etc.
 }
 
 const MONTH_NAMES = [
@@ -32,7 +33,7 @@ function getFirstDayOfMonth(year: number, month: number): number {
   return new Date(year, month, 1).getDay();
 }
 
-export function DatePicker({ startDate, endDate, onSelect, label = 'Schedule', minDate, maxDate }: DatePickerProps) {
+export function DatePicker({ startDate, endDate, onSelect, label = 'Schedule', minDate, maxDate, allowedWeekdays }: DatePickerProps) {
   const { colors } = useThemeContext();
   const today = getTodayString();
   const todayParts = today.split('-').map(Number);
@@ -77,6 +78,12 @@ export function DatePicker({ startDate, endDate, onSelect, label = 'Schedule', m
     const dateStr = formatDate(year, month, day);
     if (minDate && dateStr < minDate) return true;
     if (maxDate && dateStr > maxDate) return true;
+    
+    // Restricted to specific days of week
+    if (allowedWeekdays && allowedWeekdays.length > 0) {
+      const dayOfWeek = new Date(year, month, day).getDay();
+      if (!allowedWeekdays.includes(dayOfWeek)) return true;
+    }
     
     // If we only have past date restriction (no explicit minDate overriding it)
     if (!minDate && isPast) return true;

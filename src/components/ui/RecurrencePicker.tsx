@@ -12,6 +12,8 @@ interface RecurrencePickerProps {
   onRecurrenceChange: (r: RecurrenceType) => void;
   selectedDays: number[];
   onSelectedDaysChange: (days: number[]) => void;
+  allowedOptions?: RecurrenceType[];
+  allowedWeekdays?: number[];
 }
 
 export function RecurrencePicker({
@@ -19,13 +21,19 @@ export function RecurrencePicker({
   onRecurrenceChange,
   selectedDays,
   onSelectedDaysChange,
+  allowedOptions,
+  allowedWeekdays,
 }: RecurrencePickerProps) {
   const { colors } = useThemeContext();
 
-  const options: { key: RecurrenceType; label: string; icon: React.ComponentType<any> }[] = [
+  let options: { key: RecurrenceType; label: string; icon: React.ComponentType<any> }[] = [
     { key: 'once', label: 'Once', icon: RotateCcw },
     { key: 'daily', label: 'Daily', icon: Repeat },
     { key: 'specific_days', label: 'Specific Days', icon: CalendarDays }];
+
+  if (allowedOptions) {
+    options = options.filter(o => allowedOptions.includes(o.key));
+  }
 
   const toggleDay = (dayIndex: number) => {
     if (selectedDays.includes(dayIndex)) {
@@ -65,6 +73,9 @@ export function RecurrencePicker({
       {recurrence === 'specific_days' && (
         <View style={styles.daysRow}>
           {DAY_LABELS.map((day, i) => {
+            const isAllowed = allowedWeekdays ? allowedWeekdays.includes(i) : true;
+            if (!isAllowed) return null; // Hide disallowed days entirely for a cleaner UI
+            
             const isActive = selectedDays.includes(i);
             return (
               <TouchableOpacity
