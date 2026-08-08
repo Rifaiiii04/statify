@@ -33,6 +33,7 @@ function RootStack() {
       >
         <Stack.Screen name="index" />
         <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="settings" />
       </Stack>
     </>
   );

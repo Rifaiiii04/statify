@@ -1,18 +1,19 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import {
   View, Text, StyleSheet,
-  FlatList, TouchableOpacity, Alert,
+  FlatList, TouchableOpacity, Alert, Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   Plus, CheckCircle2, Lightbulb, Trash2,
-  Dumbbell, Brain, Palette, Shield, Users, Rocket,
+  Dumbbell, Brain, Palette, Shield, Users, Rocket, ChevronLeft
 } from 'lucide-react-native';
 import { Spacing, Typography, Radius, CATEGORY_COLORS, ClayShadow } from '@/constants/design';
 import { useThemeContext } from '@/context/theme-context';
 import { Note, StatCategory } from '@/db/schema';
 import { getAllNotes, getActiveNotes, getExecutedNotes, createNote, executeNote, unexecuteNote, deleteNote } from '@/db/repositories/note-repository';
 import { addXp, removeXp, logActivity, removeActivity } from '@/db/repositories/stats-repository';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { BottomSheet } from '@/components/ui/BottomSheet';
 import { InputField } from '@/components/ui/InputField';
 import { Button } from '@/components/ui/Button';
@@ -31,6 +32,7 @@ type FilterTab = 'all' | 'active' | 'executed';
 
 export default function NotesScreen() {
   const { colors } = useThemeContext();
+  const router = useRouter();
   const [notes, setNotes] = useState<Note[]>([]);
   const [filter, setFilter] = useState<FilterTab>('all');
   const [showSheet, setShowSheet] = useState(false);
@@ -39,12 +41,9 @@ export default function NotesScreen() {
   const [newContent, setNewContent] = useState('');
 
   const loadNotes = useCallback(async () => {
-    let result: Note[];
-    if (filter === 'active') result = await getActiveNotes();
-    else if (filter === 'executed') result = await getExecutedNotes();
-    else result = await getAllNotes();
+    const result = await getAllNotes();
     setNotes(result);
-  }, [filter]);
+  }, []);
 
   useEffect(() => {
     loadNotes();
@@ -80,27 +79,36 @@ export default function NotesScreen() {
   };
 
   const handleDelete = (note: Note) => {
-    Alert.alert('Delete Note', `Delete "${note.title}"?`, [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Delete',
-        style: 'destructive',
-        onPress: async () => {
-          if (note.executed) {
-            const categories = note.category.split(',') as StatCategory[];
-            for (const cat of categories) {
-              await removeXp(note.xp, cat);
-              await removeActivity('note', note.xp, cat);
-            }
-          }
-          await deleteNote(note.id);
-          loadNotes();
-        },
-      }]);
+    const doDelete = async () => {
+      if (note.executed) {
+        const categories = note.category.split(',') as StatCategory[];
+        for (const cat of categories) {
+          await removeXp(note.xp, cat);
+          await removeActivity('note', note.xp, cat);
+        }
+      }
+      await deleteNote(note.id);
+      loadNotes();
+    };
+
+    if (Platform.OS === 'web') {
+      if (window.confirm(`Delete "${note.title}"?`)) {
+        doDelete();
+      }
+    } else {
+      Alert.alert('Delete Note', `Delete "${note.title}"?`, [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Delete', style: 'destructive', onPress: doDelete },
+      ]);
+    }
   };
 
   const activeCount = notes.filter(n => !n.executed).length;
   const executedCount = notes.filter(n => n.executed).length;
+
+  const displayedNotes = filter === 'active' ? notes.filter(n => !n.executed)
+                       : filter === 'executed' ? notes.filter(n => n.executed)
+                       : notes;
 
   const FILTER_CONFIGS = [
     { key: 'all' as FilterTab, label: `All (${notes.length})`, color: colors.accent },
@@ -110,11 +118,16 @@ export default function NotesScreen() {
   const renderHeader = () => (
     <View>
       <View style={styles.header}>
-        <View>
-          <Text style={[styles.greeting, { color: colors.textPrimary }]}>Notes</Text>
-          <Text style={[styles.subGreeting, { color: colors.textSecondary }]}>
-            Capture ideas, execute them, earn XP
-          </Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+          <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+            <ChevronLeft color={colors.textPrimary} size={28} />
+          </TouchableOpacity>
+          <View>
+            <Text style={[styles.greeting, { color: colors.textPrimary }]}>Notes</Text>
+            <Text style={[styles.subGreeting, { color: colors.textSecondary }]}>
+              Capture ideas, execute them, earn XP
+            </Text>
+          </View>
         </View>
         <TouchableOpacity
           style={[styles.addBtn, ClayShadow.button, { backgroundColor: colors.purple }]}
@@ -145,7 +158,7 @@ export default function NotesScreen() {
         ))}
       </View>
 
-      {notes.length === 0 && (
+      {displayedNotes.length === 0 && (
         <View style={[styles.emptyState, ClayShadow.soft]}>
           <Lightbulb color={colors.textMuted} size={36} />
           <Text style={[styles.emptyText, { color: colors.textMuted }]}>
@@ -217,11 +230,11 @@ export default function NotesScreen() {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.bg }]}>
       <FlatList
-        data={notes}
+        data={displayedNotes}
         keyExtractor={item => item.id.toString()}
         renderItem={renderNote}
-        ListHeaderComponent={renderHeader}
         contentContainerStyle={styles.list}
+        ListHeaderComponent={renderHeader}
         showsVerticalScrollIndicator={false}
       />
 
@@ -273,7 +286,7 @@ export default function NotesScreen() {
                 size="lg" 
               />
               <Button 
-                title="Delete Idea" 
+                title="Delete Note" 
                 onPress={() => { setSelectedNote(null); handleDelete(selectedNote); }} 
                 size="lg" 
                 variant="ghost"

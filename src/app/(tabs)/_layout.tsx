@@ -1,33 +1,88 @@
-import { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Tabs } from 'expo-router';
-import { LayoutDashboard, Lightbulb, Timer, BarChart2, Settings, Wallet } from 'lucide-react-native';
+import { LayoutDashboard, CalendarDays, Timer, BarChart2, Wallet } from 'lucide-react-native';
 import { useThemeContext } from '@/context/theme-context';
 import { evaluateDailyBudgetQuest } from '@/db/repositories/finance-repository';
 import { cleanUpArchivedTasks } from '@/db/repositories/task-repository';
 import { ClayShadow } from '@/constants/design';
 
 import { View } from 'react-native';
+import Animated, { useAnimatedStyle, withTiming, withSpring } from 'react-native-reanimated';
 
 const TabIcon = ({ icon: Icon, focused, colors }: any) => {
+  const bgStyle = useAnimatedStyle(() => {
+    return {
+      opacity: withTiming(focused ? 1 : 0, { duration: 200 }),
+      transform: [{ scale: withSpring(focused ? 1 : 0.5, { damping: 15 }) }],
+    };
+  }, [focused]);
+
+  const iconStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ scale: withSpring(focused ? 1.1 : 1, { damping: 15 }) }],
+    };
+  }, [focused]);
+
   return (
     <View
+      style={{
+        width: 48,
+        height: 48,
+        position: 'relative',
+        top: 12,
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <Animated.View
+        style={[
+          {
+            position: 'absolute',
+            width: '100%',
+            height: '100%',
+            borderRadius: 24,
+            backgroundColor: colors.accent,
+          },
+          bgStyle,
+          ClayShadow.button,
+        ]}
+      />
+      <Animated.View style={[{ zIndex: 1 }, iconStyle]}>
+        <Icon color={focused ? colors.white : colors.textMuted} size={22} />
+      </Animated.View>
+    </View>
+  );
+};
+
+const FloatingTabIcon = ({ icon: Icon, focused, colors }: any) => {
+  const containerStyle = useAnimatedStyle(() => {
+    return {
+      transform: [
+        { scale: withSpring(focused ? 1.15 : 1, { damping: 12 }) },
+        { translateY: withSpring(focused ? -6 : 0, { damping: 12 }) }
+      ],
+    };
+  }, [focused]);
+
+  return (
+    <Animated.View
       style={[
         {
-          width: 48,
-          height: 48,
-          borderRadius: 24,
+          width: 64,
+          height: 64,
+          borderRadius: 32,
           position: 'relative',
-          top: 12,
+          top: -16,
+          backgroundColor: colors.accent,
           alignItems: 'center',
           justifyContent: 'center',
-        },
-        focused && {
-          backgroundColor: colors.accent,
           ...ClayShadow.button,
-        }]}
+        },
+        containerStyle
+      ]}
     >
-      <Icon color={focused ? colors.white : colors.textMuted} size={22} />
-    </View>
+      <Icon color={colors.white} size={28} />
+    </Animated.View>
   );
 };
 
@@ -67,17 +122,17 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="notes"
+        name="schedule"
         options={{
-          title: 'Notes',
-          tabBarIcon: ({ focused }) => <TabIcon icon={Lightbulb} focused={focused} colors={colors} />,
+          title: 'Schedule',
+          tabBarIcon: ({ focused }) => <TabIcon icon={CalendarDays} focused={focused} colors={colors} />,
         }}
       />
       <Tabs.Screen
         name="pomodoro"
         options={{
           title: 'Focus',
-          tabBarIcon: ({ focused }) => <TabIcon icon={Timer} focused={focused} colors={colors} />,
+          tabBarIcon: ({ focused }) => <FloatingTabIcon icon={Timer} focused={focused} colors={colors} />,
         }}
       />
       <Tabs.Screen
@@ -95,10 +150,9 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="settings"
+        name="notes"
         options={{
-          title: 'Settings',
-          tabBarIcon: ({ focused }) => <TabIcon icon={Settings} focused={focused} colors={colors} />,
+          href: null, // Hide from bottom nav
         }}
       />
     </Tabs>

@@ -8,6 +8,9 @@ export const CREATE_TASKS_TABLE = `
     completed INTEGER NOT NULL DEFAULT 0,
     status TEXT NOT NULL DEFAULT 'active',
     is_system INTEGER NOT NULL DEFAULT 0,
+    parent_id INTEGER DEFAULT NULL,
+    start_date TEXT DEFAULT NULL,
+    deadline TEXT DEFAULT NULL,
     xp INTEGER NOT NULL DEFAULT 10,
     created_at TEXT NOT NULL DEFAULT (datetime('now')),
     completed_at TEXT
@@ -114,6 +117,9 @@ export interface Task {
   completed: number;
   status: 'active' | 'done' | 'failed' | 'archived';
   is_system: number;
+  parent_id: number | null;
+  start_date: string | null;
+  deadline: string | null;
   xp: number;
   created_at: string;
   completed_at: string | null;

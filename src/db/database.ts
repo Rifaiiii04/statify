@@ -49,6 +49,18 @@ async function initDatabase(db: SQLite.SQLiteDatabase): Promise<void> {
     await db.execAsync("ALTER TABLE tasks ADD COLUMN status TEXT NOT NULL DEFAULT 'active'");
     await db.execAsync("UPDATE tasks SET status = 'done' WHERE completed = 1 AND status = 'active'");
   } catch (e) {}
+
+  try {
+    await db.execAsync("ALTER TABLE tasks ADD COLUMN parent_id INTEGER DEFAULT NULL");
+  } catch (e) {}
+
+  try {
+    await db.execAsync("ALTER TABLE tasks ADD COLUMN deadline TEXT DEFAULT NULL");
+  } catch (e) {}
+
+  try {
+    await db.execAsync("ALTER TABLE tasks ADD COLUMN start_date TEXT DEFAULT NULL");
+  } catch (e) {}
 }
 
 export async function resetDatabase(): Promise<void> {
