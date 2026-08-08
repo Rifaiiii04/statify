@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Repeat, CalendarDays, RotateCcw } from 'lucide-react-native';
-import { Spacing, Radius, Typography } from '@/constants/design';
+import { Spacing, Radius, Typography, ClayShadow } from '@/constants/design';
 import { RecurrenceType } from '@/db/schema';
 import { useThemeContext } from '@/context/theme-context';
 
@@ -25,8 +25,7 @@ export function RecurrencePicker({
   const options: { key: RecurrenceType; label: string; icon: React.ComponentType<any> }[] = [
     { key: 'once', label: 'Once', icon: RotateCcw },
     { key: 'daily', label: 'Daily', icon: Repeat },
-    { key: 'specific_days', label: 'Specific Days', icon: CalendarDays },
-  ];
+    { key: 'specific_days', label: 'Specific Days', icon: CalendarDays }];
 
   const toggleDay = (dayIndex: number) => {
     if (selectedDays.includes(dayIndex)) {
@@ -47,18 +46,15 @@ export function RecurrencePicker({
               key={key}
               style={[
                 styles.option,
-                { borderColor: colors.border, backgroundColor: colors.surfaceHigh },
-                isSelected && { borderColor: colors.yellow, backgroundColor: colors.yellowSoft },
-              ]}
+                ClayShadow.soft, isSelected && { backgroundColor: colors.accentSoft, shadowColor: colors.accent }]}
               onPress={() => onRecurrenceChange(key)}
               activeOpacity={0.7}
             >
-              <Icon color={isSelected ? colors.yellow : colors.textMuted} size={14} />
+              <Icon color={isSelected ? colors.accent : colors.textMuted} size={14} />
               <Text style={[
                 styles.optionText,
                 { color: colors.textSecondary },
-                isSelected && { color: colors.yellow },
-              ]}>
+                isSelected && { color: colors.accent }]}>
                 {label}
               </Text>
             </TouchableOpacity>
@@ -75,17 +71,14 @@ export function RecurrencePicker({
                 key={day}
                 style={[
                   styles.dayChip,
-                  { borderColor: colors.border, backgroundColor: colors.surfaceHigh },
-                  isActive && { borderColor: colors.yellow, backgroundColor: colors.yellowSoft },
-                ]}
+                  ClayShadow.soft, isActive && { backgroundColor: colors.accentSoft, shadowColor: colors.accent }]}
                 onPress={() => toggleDay(i)}
                 activeOpacity={0.7}
               >
                 <Text style={[
                   styles.dayText,
                   { color: colors.textMuted },
-                  isActive && { color: colors.yellow },
-                ]}>
+                  isActive && { color: colors.accent }]}>
                   {day}
                 </Text>
               </TouchableOpacity>
@@ -107,17 +100,19 @@ const styles = StyleSheet.create({
   },
   optionsRow: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: Spacing.sm,
   },
   option: {
-    flex: 1,
+    flexGrow: 1,
+    minWidth: 100,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 6,
-    paddingVertical: 10,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
     borderRadius: Radius.md,
-    borderWidth: 1,
   },
   optionText: {
     ...Typography.bodySmall,
@@ -125,15 +120,17 @@ const styles = StyleSheet.create({
   },
   daysRow: {
     flexDirection: 'row',
-    gap: 6,
+    flexWrap: 'wrap',
+    gap: 8,
     marginTop: Spacing.sm,
   },
   dayChip: {
-    flex: 1,
+    flexGrow: 1,
+    minWidth: 40,
     alignItems: 'center',
-    paddingVertical: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 10,
     borderRadius: Radius.sm,
-    borderWidth: 1,
   },
   dayText: {
     ...Typography.caption,

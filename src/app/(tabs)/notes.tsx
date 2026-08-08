@@ -1,13 +1,14 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import {
-  View, Text, StyleSheet, SafeAreaView,
+  View, Text, StyleSheet,
   FlatList, TouchableOpacity, Alert,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   Plus, CheckCircle2, Lightbulb, Trash2,
   Dumbbell, Brain, Palette, Shield, Users, Rocket,
 } from 'lucide-react-native';
-import { Spacing, Typography, Radius, CATEGORY_COLORS } from '@/constants/design';
+import { Spacing, Typography, Radius, CATEGORY_COLORS, ClayShadow } from '@/constants/design';
 import { useThemeContext } from '@/context/theme-context';
 import { Note, StatCategory } from '@/db/schema';
 import { getAllNotes, getActiveNotes, getExecutedNotes, createNote, executeNote, unexecuteNote, deleteNote } from '@/db/repositories/note-repository';
@@ -95,18 +96,16 @@ export default function NotesScreen() {
           await deleteNote(note.id);
           loadNotes();
         },
-      },
-    ]);
+      }]);
   };
 
   const activeCount = notes.filter(n => !n.executed).length;
   const executedCount = notes.filter(n => n.executed).length;
 
-  const filterTabs: { key: FilterTab; label: string }[] = [
-    { key: 'all', label: `All (${notes.length})` },
-    { key: 'active', label: `Active (${activeCount})` },
-    { key: 'executed', label: `Done (${executedCount})` },
-  ];
+  const FILTER_CONFIGS = [
+    { key: 'all' as FilterTab, label: `All (${notes.length})`, color: colors.accent },
+    { key: 'active' as FilterTab, label: `Active (${activeCount})`, color: colors.purple },
+    { key: 'executed' as FilterTab, label: `Done (${executedCount})`, color: colors.mint }];
 
   const renderHeader = () => (
     <View>
@@ -118,39 +117,36 @@ export default function NotesScreen() {
           </Text>
         </View>
         <TouchableOpacity
-          style={[styles.addBtn, { backgroundColor: colors.yellow }]}
+          style={[styles.addBtn, ClayShadow.button, { backgroundColor: colors.purple }]}
           onPress={() => setShowSheet(true)}
           activeOpacity={0.75}
         >
-          <Plus color={colors.black} size={20} />
+          <Plus color={colors.white} size={20} />
         </TouchableOpacity>
       </View>
 
       <View style={styles.filterRow}>
-        {filterTabs.map(tab => (
+        {FILTER_CONFIGS.map(({ key, label, color }) => (
           <TouchableOpacity
-            key={tab.key}
+            key={key}
             style={[
               styles.filterTab,
-              { borderColor: colors.border, backgroundColor: colors.surfaceHigh },
-              filter === tab.key && { borderColor: colors.yellow, backgroundColor: colors.yellowSoft },
-            ]}
-            onPress={() => setFilter(tab.key)}
+              ClayShadow.soft, filter === key && { backgroundColor: color + '18', shadowColor: color }]}
+            onPress={() => setFilter(key)}
             activeOpacity={0.7}
           >
             <Text style={[
               styles.filterText,
               { color: colors.textSecondary },
-              filter === tab.key && { color: colors.yellow },
-            ]}>
-              {tab.label}
+              filter === key && { color }]}>
+              {label}
             </Text>
           </TouchableOpacity>
         ))}
       </View>
 
       {notes.length === 0 && (
-        <View style={[styles.emptyState, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+        <View style={[styles.emptyState, ClayShadow.soft]}>
           <Lightbulb color={colors.textMuted} size={36} />
           <Text style={[styles.emptyText, { color: colors.textMuted }]}>
             No ideas yet. Tap + to capture your first idea.
@@ -164,18 +160,15 @@ export default function NotesScreen() {
     const categories = item.category.split(',') as StatCategory[];
     const isExecuted = !!item.executed;
     
-    // Use the first category's icon/color for the main note icon
     const mainCat = categories[0] || 'Creativity';
     const MainCatIcon = CATEGORY_ICON_MAP[mainCat] || Lightbulb;
-    const mainCatColor = CATEGORY_COLORS[mainCat] || colors.yellow;
+    const mainCatColor = CATEGORY_COLORS[mainCat] || colors.accent;
 
     return (
       <TouchableOpacity
         style={[
           styles.noteCard,
-          { backgroundColor: colors.surface, borderColor: colors.border },
-          isExecuted && { opacity: 0.6 },
-        ]}
+          ClayShadow.card, isExecuted && { opacity: 0.6 }]}
         onPress={() => setSelectedNote(item)}
         onLongPress={() => handleDelete(item)}
         activeOpacity={0.7}
@@ -189,8 +182,7 @@ export default function NotesScreen() {
               style={[
                 styles.noteTitle,
                 { color: colors.textPrimary },
-                isExecuted && { textDecorationLine: 'line-through', color: colors.textSecondary },
-              ]}
+                isExecuted && { textDecorationLine: 'line-through', color: colors.textSecondary }]}
             >
               {item.title}
             </Text>
@@ -200,21 +192,21 @@ export default function NotesScreen() {
               </Text>
             ) : null}
           </View>
-          {isExecuted && <CheckCircle2 color={colors.yellow} size={20} />}
+          {isExecuted && <CheckCircle2 color={colors.mint} size={20} />}
         </View>
         <View style={styles.noteMeta}>
           {categories.map((cat) => {
-            const catColor = CATEGORY_COLORS[cat] || colors.yellow;
+            const catColor = CATEGORY_COLORS[cat] || colors.accent;
             return (
-              <View key={cat} style={[styles.categoryBadge, { borderColor: catColor, backgroundColor: catColor + '18' }]}>
+              <View key={cat} style={[styles.categoryBadge, { backgroundColor: catColor + '18' }]}>
                 <Text style={[styles.categoryText, { color: catColor }]}>{cat}</Text>
               </View>
             );
           })}
-          <Text style={[styles.xpText, { color: colors.textMuted }]}>+{item.xp * categories.length} XP</Text>
+          <Text style={[styles.xpText, { color: colors.accent }]}>+{item.xp * categories.length} XP</Text>
           {isExecuted && (
-            <View style={[styles.executedBadge, { backgroundColor: colors.yellowSoft }]}>
-              <Text style={[styles.executedText, { color: colors.yellow }]}>Executed</Text>
+            <View style={[styles.executedBadge, { backgroundColor: colors.mintSoft }]}>
+              <Text style={[styles.executedText, { color: colors.mint }]}>Executed</Text>
             </View>
           )}
         </View>
@@ -265,9 +257,9 @@ export default function NotesScreen() {
             
             <View style={styles.detailMeta}>
               {selectedNote.category.split(',').map((cat) => {
-                const catColor = CATEGORY_COLORS[cat] || colors.yellow;
+                const catColor = CATEGORY_COLORS[cat] || colors.accent;
                 return (
-                  <View key={cat} style={[styles.categoryBadge, { borderColor: catColor, backgroundColor: catColor + '18' }]}>
+                  <View key={cat} style={[styles.categoryBadge, { backgroundColor: catColor + '18' }]}>
                     <Text style={[styles.categoryText, { color: catColor }]}>{cat}</Text>
                   </View>
                 );
@@ -295,8 +287,8 @@ export default function NotesScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  list: { padding: Spacing.lg, paddingBottom: 40 },
+  container: { flex: 1, paddingHorizontal: Spacing.lg, paddingTop: Spacing.lg },
+  list: { paddingBottom: 120 },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -306,8 +298,8 @@ const styles = StyleSheet.create({
   greeting: { ...Typography.displayMedium, marginBottom: 2 },
   subGreeting: { ...Typography.bodySmall },
   addBtn: {
-    width: 44,
-    height: 44,
+    width: 48,
+    height: 48,
     borderRadius: Radius.md,
     alignItems: 'center',
     justifyContent: 'center',
@@ -318,10 +310,9 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.lg,
   },
   filterTab: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
     borderRadius: Radius.full,
-    borderWidth: 1,
   },
   filterText: { ...Typography.bodySmall, fontWeight: '500' },
   emptyState: {
@@ -329,15 +320,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 12,
-    borderRadius: Radius.md,
-    borderWidth: 1,
+    borderRadius: Radius.lg,
   },
   emptyText: { ...Typography.body, textAlign: 'center' },
   noteCard: {
-    borderWidth: 1,
-    borderRadius: Radius.md,
+    borderRadius: Radius.lg,
     padding: Spacing.md,
-    marginBottom: Spacing.sm,
+    marginBottom: Spacing.md,
   },
   noteHeader: {
     flexDirection: 'row',
@@ -346,8 +335,8 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   noteIconWrap: {
-    width: 36,
-    height: 36,
+    width: 40,
+    height: 40,
     borderRadius: Radius.sm,
     alignItems: 'center',
     justifyContent: 'center',
@@ -359,16 +348,15 @@ const styles = StyleSheet.create({
   categoryBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
     borderRadius: Radius.full,
-    borderWidth: 1,
   },
   categoryText: { ...Typography.caption },
-  xpText: { ...Typography.caption },
+  xpText: { ...Typography.caption, fontWeight: '600' },
   executedBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 3,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
     borderRadius: Radius.full,
   },
   executedText: { ...Typography.caption, fontWeight: '600' },

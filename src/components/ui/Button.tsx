@@ -1,7 +1,7 @@
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet, ActivityIndicator, ViewStyle } from 'react-native';
 import { LucideIcon } from 'lucide-react-native';
-import { Radius, Typography } from '@/constants/design';
+import { Radius, Typography, ClayShadow } from '@/constants/design';
 import { useThemeContext } from '@/context/theme-context';
 
 interface ButtonProps {
@@ -29,18 +29,18 @@ export function Button({
   const isDisabled = disabled || loading;
 
   const containerVariants: Record<string, ViewStyle> = {
-    primary: { backgroundColor: colors.yellow },
-    secondary: { backgroundColor: colors.surfaceHigh, borderWidth: 1, borderColor: colors.border },
-    outline: { backgroundColor: 'transparent', borderWidth: 1, borderColor: colors.yellow },
+    primary: { backgroundColor: colors.accent, ...ClayShadow.button },
+    secondary: { backgroundColor: colors.surface, ...ClayShadow.soft },
+    outline: { backgroundColor: 'transparent', borderWidth: 1.5, borderColor: colors.accent },
     ghost: { backgroundColor: 'transparent' },
-    danger: { backgroundColor: colors.danger },
+    danger: { backgroundColor: colors.coral, ...ClayShadow.button },
   };
 
   const textColors: Record<string, string> = {
-    primary: colors.black,
+    primary: colors.white,
     secondary: colors.textPrimary,
-    outline: colors.yellow,
-    ghost: colors.yellow,
+    outline: colors.accent,
+    ghost: colors.accent,
     danger: colors.white,
   };
 

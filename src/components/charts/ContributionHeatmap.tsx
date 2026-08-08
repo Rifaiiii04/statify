@@ -57,10 +57,10 @@ export function ContributionHeatmap({ data, weeks = 20 }: ContributionHeatmapPro
   const getColor = (value: number): string => {
     if (value === 0) return colors.surfaceHigh;
     const ratio = value / maxVal;
-    if (ratio <= 0.25) return colors.yellow + '30';
-    if (ratio <= 0.5) return colors.yellow + '60';
-    if (ratio <= 0.75) return colors.yellow + '99';
-    return colors.yellow;
+    if (ratio <= 0.25) return colors.accent + '30';
+    if (ratio <= 0.5) return colors.accent + '60';
+    if (ratio <= 0.75) return colors.accent + '99';
+    return colors.accent;
   };
 
   const svgWidth = (weeks + 2) * (cellSize + gap);

@@ -1,28 +1,17 @@
-import React, { createContext, useContext, useState, useCallback, useMemo } from 'react';
-import { ThemeMode, getColors, ThemeColors } from '@/constants/design';
+import React, { createContext, useContext, useMemo } from 'react';
+import { getColors, ThemeColors } from '@/constants/design';
 
 interface ThemeContextValue {
-  mode: ThemeMode;
   colors: ThemeColors;
-  toggleTheme: () => void;
 }
 
 const ThemeContext = createContext<ThemeContextValue>({
-  mode: 'dark',
-  colors: getColors('dark'),
-  toggleTheme: () => {},
+  colors: getColors(),
 });
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [mode, setMode] = useState<ThemeMode>('dark');
-
-  const toggleTheme = useCallback(() => {
-    setMode(prev => (prev === 'dark' ? 'light' : 'dark'));
-  }, []);
-
-  const colors = useMemo(() => getColors(mode), [mode]);
-
-  const value = useMemo(() => ({ mode, colors, toggleTheme }), [mode, colors, toggleTheme]);
+  const colors = useMemo(() => getColors(), []);
+  const value = useMemo(() => ({ colors }), [colors]);
 
   return (
     <ThemeContext.Provider value={value}>

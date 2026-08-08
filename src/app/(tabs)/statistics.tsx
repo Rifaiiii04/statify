@@ -1,9 +1,10 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import {
-  View, Text, StyleSheet, SafeAreaView, ScrollView,
+  View, Text, StyleSheet, ScrollView,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Zap, CheckCircle2, Timer, TrendingUp, Lightbulb, Flame } from 'lucide-react-native';
-import { Spacing, Typography, Radius } from '@/constants/design';
+import { Spacing, Typography, Radius, ClayShadow } from '@/constants/design';
 import { useThemeContext } from '@/context/theme-context';
 import { UserStats } from '@/db/schema';
 import {
@@ -17,16 +18,17 @@ import { useFocusEffect } from 'expo-router';
 
 interface StatCardProps {
   icon: any;
+  iconColor: string;
   label: string;
   value: string | number;
   sub?: string;
 }
 
-function StatCard({ icon: Icon, label, value, sub }: StatCardProps) {
+function StatCard({ icon: Icon, iconColor, label, value, sub }: StatCardProps) {
   const { colors } = useThemeContext();
   return (
-    <View style={[cardStyles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-      <Icon color={colors.yellow} size={18} />
+    <View style={[cardStyles.card, ClayShadow.soft]}>
+      <Icon color={iconColor} size={18} />
       <Text style={[cardStyles.label, { color: colors.textSecondary }]}>{label}</Text>
       <Text style={[cardStyles.value, { color: colors.textPrimary }]}>{value}</Text>
       {sub && <Text style={[cardStyles.sub, { color: colors.textSecondary }]}>{sub}</Text>}
@@ -37,8 +39,7 @@ function StatCard({ icon: Icon, label, value, sub }: StatCardProps) {
 const cardStyles = StyleSheet.create({
   card: {
     flex: 1,
-    borderWidth: 1,
-    borderRadius: Radius.md,
+    borderRadius: Radius.lg,
     padding: Spacing.md,
     gap: 4,
   },
@@ -63,8 +64,7 @@ export default function StatisticsScreen() {
       getStreak(),
       getTotalCompletedTasks(),
       getTotalExecutedNotes(),
-      getTotalSessionCount(),
-    ]);
+      getTotalSessionCount()]);
     setStats(s);
     setHeatmapData(h);
     setStreak(st);
@@ -100,9 +100,9 @@ export default function StatisticsScreen() {
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         <Text style={[styles.pageTitle, { color: colors.textPrimary }]}>Statistics</Text>
 
-        <View style={[styles.levelCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+        <View style={[styles.levelCard, ClayShadow.card]}>
           <View style={styles.levelLeft}>
-            <Text style={[styles.levelBadge, { backgroundColor: colors.yellow, color: colors.black }]}>
+            <Text style={[styles.levelBadge, { backgroundColor: colors.accent, color: colors.white }]}>
               LVL {level}
             </Text>
             <View>
@@ -112,22 +112,22 @@ export default function StatisticsScreen() {
               </Text>
             </View>
           </View>
-          <Zap color={colors.yellow} size={28} />
+          <Zap color={colors.amber} size={28} />
         </View>
 
-        <View style={[styles.xpBarTrack, { backgroundColor: colors.border }]}>
-          <View style={[styles.xpBarFill, { width: `${xpProgress}%`, backgroundColor: colors.yellow }]} />
+        <View style={[styles.xpBarTrack, ClayShadow.soft]}>
+          <View style={[styles.xpBarFill, { width: `${xpProgress}%`, backgroundColor: colors.accent }]} />
         </View>
 
         <View style={styles.statsRow}>
-          <StatCard icon={CheckCircle2} label="Tasks" value={completedTasks} sub="completed" />
-          <View style={{ width: Spacing.sm }} />
-          <StatCard icon={Lightbulb} label="Ideas" value={executedNotes} sub="executed" />
+          <StatCard icon={CheckCircle2} iconColor={colors.mint} label="Tasks" value={completedTasks} sub="completed" />
+          <View style={{ width: Spacing.md }} />
+          <StatCard icon={Lightbulb} iconColor={colors.purple} label="Ideas" value={executedNotes} sub="executed" />
         </View>
         <View style={styles.statsRow}>
-          <StatCard icon={Timer} label="Focus" value={pomodoroCount} sub="sessions" />
-          <View style={{ width: Spacing.sm }} />
-          <StatCard icon={Flame} label="Streak" value={streak} sub="days" />
+          <StatCard icon={Timer} iconColor={colors.coral} label="Focus" value={pomodoroCount} sub="sessions" />
+          <View style={{ width: Spacing.md }} />
+          <StatCard icon={Flame} iconColor={colors.amber} label="Streak" value={streak} sub="days" />
         </View>
 
         <View style={styles.section}>
@@ -135,7 +135,7 @@ export default function StatisticsScreen() {
           <Text style={[styles.sectionSub, { color: colors.textSecondary }]}>
             Your growth across all categories
           </Text>
-          <View style={[styles.chartCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+          <View style={[styles.chartCard, ClayShadow.card]}>
             {stats && Object.values(spiderData).some(v => v > 0) ? (
               <SpiderChart data={spiderData} />
             ) : (
@@ -154,7 +154,7 @@ export default function StatisticsScreen() {
           <Text style={[styles.sectionSub, { color: colors.textSecondary }]}>
             Your daily activity over the past 20 weeks
           </Text>
-          <View style={[styles.chartCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+          <View style={[styles.chartCard, ClayShadow.card]}>
             <ContributionHeatmap data={heatmapData} weeks={20} />
           </View>
         </View>
@@ -164,12 +164,11 @@ export default function StatisticsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  scroll: { padding: Spacing.lg, paddingBottom: 100 },
+  container: { flex: 1, paddingHorizontal: Spacing.lg, paddingTop: Spacing.lg },
+  scroll: { paddingBottom: 120 },
   pageTitle: { ...Typography.displayMedium, marginBottom: Spacing.lg },
   levelCard: {
-    borderWidth: 1,
-    borderRadius: Radius.md,
+    borderRadius: Radius.lg,
     padding: Spacing.lg,
     flexDirection: 'row',
     alignItems: 'center',
@@ -179,15 +178,15 @@ const styles = StyleSheet.create({
   levelLeft: { flexDirection: 'row', alignItems: 'center', gap: 16 },
   levelBadge: {
     ...Typography.titleMedium,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
     borderRadius: Radius.sm,
     overflow: 'hidden',
   },
   levelXp: { ...Typography.titleMedium },
   levelSub: { ...Typography.bodySmall, marginTop: 2 },
   xpBarTrack: {
-    height: 4,
+    height: 8,
     borderRadius: Radius.full,
     marginBottom: Spacing.lg,
     overflow: 'hidden',
@@ -196,13 +195,12 @@ const styles = StyleSheet.create({
     height: '100%',
     borderRadius: Radius.full,
   },
-  statsRow: { flexDirection: 'row', marginBottom: Spacing.sm },
+  statsRow: { flexDirection: 'row', marginBottom: Spacing.md },
   section: { marginTop: Spacing.md, marginBottom: Spacing.lg },
   sectionTitle: { ...Typography.titleMedium, marginBottom: 2 },
   sectionSub: { ...Typography.bodySmall, marginBottom: Spacing.md },
   chartCard: {
-    borderWidth: 1,
-    borderRadius: Radius.md,
+    borderRadius: Radius.lg,
     padding: Spacing.md,
     overflow: 'hidden',
   },

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { View, TextInput, StyleSheet, Text, TouchableOpacity, TextInputProps } from 'react-native';
+import { View, TextInput, StyleSheet, Text, TouchableOpacity, TextInputProps, Platform } from 'react-native';
 import { LucideIcon } from 'lucide-react-native';
-import { Radius, Typography } from '@/constants/design';
+import { Radius, Typography, ClayShadow } from '@/constants/design';
 import { useThemeContext } from '@/context/theme-context';
 
 interface InputFieldProps extends TextInputProps {
@@ -33,15 +33,18 @@ export function InputField({
       {label && <Text style={[styles.label, { color: colors.textSecondary }]}>{label}</Text>}
       <View style={[
         styles.inputContainer,
-        { backgroundColor: colors.surfaceHigh, borderColor: colors.border },
-        focused && { borderColor: colors.yellow },
-        error ? { borderColor: colors.danger } : null,
-      ]}>
-        {Icon && <Icon color={focused ? colors.yellow : colors.textSecondary} size={18} style={styles.leftIcon} />}
+        ClayShadow.soft, focused && { shadowColor: colors.accent },
+        error ? { shadowColor: colors.coral } : null]}>
+        {Icon && <Icon color={focused ? colors.accent : colors.textSecondary} size={18} style={styles.leftIcon} />}
         <TextInput
-          style={[styles.input, { color: colors.textPrimary }, style]}
+          style={[
+            styles.input, 
+            { color: colors.textPrimary }, 
+            Platform.OS === 'web' && ({ outlineStyle: 'none' } as any),
+            style
+          ]}
           placeholderTextColor={colors.textMuted}
-          selectionColor={colors.yellow}
+          selectionColor={colors.accent}
           onFocus={(e) => { setFocused(true); onFocus?.(e); }}
           onBlur={(e) => { setFocused(false); onBlur?.(e); }}
           {...props}
@@ -52,7 +55,7 @@ export function InputField({
           </TouchableOpacity>
         )}
       </View>
-      {error && <Text style={[styles.errorText, { color: colors.danger }]}>{error}</Text>}
+      {error && <Text style={[styles.errorText, { color: colors.coral }]}>{error}</Text>}
       {hint && !error && <Text style={[styles.hintText, { color: colors.textSecondary }]}>{hint}</Text>}
     </View>
   );
@@ -70,18 +73,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     borderRadius: Radius.md,
-    borderWidth: 1,
-    paddingHorizontal: 14,
+    paddingHorizontal: 16,
     minHeight: 52,
   },
   leftIcon: { marginRight: 10 },
   rightIcon: { padding: 4 },
   input: {
     flex: 1,
+    fontFamily: 'Poppins_400Regular',
     fontSize: 15,
     paddingVertical: 12,
-    // @ts-ignore: outlineStyle is a web-only property
-    outlineStyle: 'none',
   },
   errorText: { ...Typography.bodySmall, marginTop: 6 },
   hintText: { ...Typography.bodySmall, marginTop: 6 },

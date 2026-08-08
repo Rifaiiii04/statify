@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
-  View, Text, StyleSheet, SafeAreaView, TouchableOpacity, Animated,
+  View, Text, StyleSheet, TouchableOpacity, Animated,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Play, Pause, RotateCcw, CheckCircle, SkipForward } from 'lucide-react-native';
-import { Spacing, Typography, Radius } from '@/constants/design';
+import { Spacing, Typography, Radius, ClayShadow } from '@/constants/design';
 import { useThemeContext } from '@/context/theme-context';
 import { createSession, getTodaySessionCount } from '@/db/repositories/pomodoro-repository';
 import { addXp, logActivity } from '@/db/repositories/stats-repository';
@@ -100,7 +101,7 @@ export default function PomodoroScreen() {
         <View style={styles.header}>
           <Text style={[styles.title, { color: colors.textPrimary }]}>Focus</Text>
           <View style={styles.phaseBadge}>
-            <View style={[styles.phaseDot, { backgroundColor: phase === 'work' ? colors.yellow : colors.success }]} />
+            <View style={[styles.phaseDot, { backgroundColor: phase === 'work' ? colors.coral : colors.mint }]} />
             <Text style={[styles.phaseLabel, { color: colors.textSecondary }]}>
               {phase === 'work' ? 'Work session' : 'Short break'}
             </Text>
@@ -108,7 +109,7 @@ export default function PomodoroScreen() {
         </View>
 
         <View style={styles.ringContainer}>
-          <View style={[styles.ringTrack, { borderColor: colors.surfaceHigh }]}>
+          <View style={[styles.ringTrack, ClayShadow.card]}>
             <View style={styles.ringInner}>
               <Text style={[styles.timeText, { color: colors.textPrimary }]}>{formatTime(timeLeft)}</Text>
               <Text style={[styles.timeSub, { color: colors.textSecondary }]}>
@@ -124,9 +125,7 @@ export default function PomodoroScreen() {
               key={i}
               style={[
                 styles.sessionDot,
-                { backgroundColor: colors.surfaceHigh, borderColor: colors.border },
-                i < sessionCount && { backgroundColor: colors.yellow, borderColor: colors.yellow },
-              ]}
+                ClayShadow.soft, i < sessionCount && { backgroundColor: colors.amber, shadowColor: colors.amber }]}
             />
           ))}
           <Text style={[styles.sessionText, { color: colors.textSecondary }]}>
@@ -136,7 +135,7 @@ export default function PomodoroScreen() {
 
         <View style={styles.controls}>
           <TouchableOpacity
-            style={[styles.secondaryBtn, { backgroundColor: colors.surfaceHigh, borderColor: colors.border }]}
+            style={[styles.secondaryBtn, ClayShadow.soft]}
             onPress={resetTimer}
             activeOpacity={0.7}
           >
@@ -144,17 +143,17 @@ export default function PomodoroScreen() {
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.primaryBtn, { backgroundColor: colors.yellow }, isActive && styles.primaryBtnActive]}
+            style={[styles.primaryBtn, ClayShadow.button, { backgroundColor: colors.coral }, isActive && styles.primaryBtnActive]}
             onPress={toggleTimer}
             activeOpacity={0.8}
           >
             {isActive
-              ? <Pause color={colors.black} size={28} fill={colors.black} />
-              : <Play color={colors.black} size={28} fill={colors.black} />}
+              ? <Pause color={colors.white} size={28} fill={colors.white} />
+              : <Play color={colors.white} size={28} fill={colors.white} />}
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.secondaryBtn, { backgroundColor: colors.surfaceHigh, borderColor: colors.border }]}
+            style={[styles.secondaryBtn, ClayShadow.soft]}
             onPress={skipPhase}
             activeOpacity={0.7}
           >
@@ -162,9 +161,9 @@ export default function PomodoroScreen() {
           </TouchableOpacity>
         </View>
 
-        <View style={[styles.xpReminder, { backgroundColor: colors.surfaceHigh, borderColor: colors.border }]}>
+        <View style={[styles.xpReminder, ClayShadow.soft]}>
           <Text style={[styles.xpReminderText, { color: colors.textSecondary }]}>
-            Complete a session to earn <Text style={{ color: colors.yellow }}>+15 XP</Text> in Discipline
+            Complete a session to earn <Text style={{ color: colors.accent }}>+15 XP</Text> in Discipline
           </Text>
         </View>
       </View>
@@ -185,25 +184,23 @@ const styles = StyleSheet.create({
     width: 240,
     height: 240,
     borderRadius: 120,
-    borderWidth: 8,
     alignItems: 'center',
     justifyContent: 'center',
   },
   ringInner: { alignItems: 'center' },
-  timeText: { fontSize: 56, fontWeight: '700', letterSpacing: -1 },
+  timeText: { fontFamily: 'Poppins_700Bold', fontSize: 56, letterSpacing: -1 },
   timeSub: { ...Typography.bodySmall, marginTop: 4 },
   sessionRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 6,
+    gap: 8,
     marginBottom: Spacing.xl,
   },
   sessionDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    borderWidth: 1,
+    width: 12,
+    height: 12,
+    borderRadius: 6,
   },
   sessionText: { ...Typography.bodySmall, marginLeft: 4 },
   controls: {
@@ -221,10 +218,9 @@ const styles = StyleSheet.create({
   },
   primaryBtnActive: { opacity: 0.9 },
   secondaryBtn: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    borderWidth: 1,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -232,8 +228,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: Spacing.xl,
     padding: Spacing.md,
-    borderRadius: Radius.md,
-    borderWidth: 1,
+    borderRadius: Radius.lg,
   },
   xpReminderText: { ...Typography.bodySmall },
 });

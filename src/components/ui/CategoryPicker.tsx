@@ -1,12 +1,11 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
-import {
-  Dumbbell, Brain, Palette, Shield, Users, Rocket,
-} from 'lucide-react-native';
-import { Spacing, Radius, Typography, CATEGORY_COLORS } from '@/constants/design';
-import { StatCategory, STAT_CATEGORIES } from '@/db/schema';
+import { Dumbbell, Brain, Palette, Shield, Users, Rocket } from 'lucide-react-native';
+import { Spacing, Radius, Typography, CATEGORY_COLORS, ClayShadow } from '@/constants/design';
+import { StatCategory } from '@/db/schema';
 import { useThemeContext } from '@/context/theme-context';
 
+const STAT_CATEGORIES: StatCategory[] = ['Physical', 'Intelligence', 'Creativity', 'Discipline', 'Social', 'Productivity'];
 const ICONS: Record<string, React.ComponentType<any>> = {
   Physical: Dumbbell,
   Intelligence: Brain,
@@ -16,36 +15,26 @@ const ICONS: Record<string, React.ComponentType<any>> = {
   Productivity: Rocket,
 };
 
-type SingleProps = {
-  multiple?: false;
-  selected: StatCategory;
-  onSelect: (category: StatCategory) => void;
-};
-
-type MultiProps = {
-  multiple: true;
+interface CategoryPickerProps {
+  selected: StatCategory | StatCategory[];
+  onSelect: (v: any) => void;
+  multiple?: boolean;
   max?: number;
-  selected: StatCategory[];
-  onSelect: (categories: StatCategory[]) => void;
-};
+}
 
-type CategoryPickerProps = SingleProps | MultiProps;
-
-export function CategoryPicker(props: CategoryPickerProps) {
+export function CategoryPicker({ selected, onSelect, multiple = false, max = 6 }: CategoryPickerProps) {
   const { colors } = useThemeContext();
-  const { multiple, selected, onSelect, max } = props as MultiProps & SingleProps;
 
   const handleSelect = (cat: StatCategory) => {
     if (multiple) {
-      const currentSelected = selected as StatCategory[];
-      if (currentSelected.includes(cat)) {
-        (onSelect as any)(currentSelected.filter((c) => c !== cat));
-      } else {
-        if (max && currentSelected.length >= max) return;
-        (onSelect as any)([...currentSelected, cat]);
+      const sel = selected as StatCategory[];
+      if (sel.includes(cat)) {
+        onSelect(sel.filter(c => c !== cat));
+      } else if (sel.length < max) {
+        onSelect([...sel, cat]);
       }
     } else {
-      (onSelect as any)(cat);
+      onSelect(cat);
     }
   };
 
@@ -63,9 +52,7 @@ export function CategoryPicker(props: CategoryPickerProps) {
               key={cat}
               style={[
                 styles.chip,
-                { borderColor: colors.border, backgroundColor: colors.surfaceHigh },
-                isSelected && { borderColor: catColor, backgroundColor: catColor + '18' },
-              ]}
+                ClayShadow.soft, isSelected && { backgroundColor: catColor + '18', shadowColor: catColor }]}
               onPress={() => handleSelect(cat)}
               activeOpacity={0.7}
             >
@@ -73,8 +60,7 @@ export function CategoryPicker(props: CategoryPickerProps) {
               <Text style={[
                 styles.chipText,
                 { color: colors.textSecondary },
-                isSelected && { color: catColor },
-              ]}>
+                isSelected && { color: catColor }]}>
                 {cat}
               </Text>
             </TouchableOpacity>
@@ -86,7 +72,7 @@ export function CategoryPicker(props: CategoryPickerProps) {
 }
 
 const styles = StyleSheet.create({
-  container: { marginBottom: Spacing.md },
+  container: { marginBottom: 16 },
   label: {
     ...Typography.label,
     marginBottom: Spacing.sm,
@@ -98,10 +84,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    paddingHorizontal: 12,
+    paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: Radius.full,
-    borderWidth: 1,
   },
   chipText: {
     ...Typography.bodySmall,

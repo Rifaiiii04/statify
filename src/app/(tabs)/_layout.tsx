@@ -4,6 +4,7 @@ import { LayoutDashboard, Lightbulb, Timer, BarChart2, Settings, Wallet } from '
 import { useThemeContext } from '@/context/theme-context';
 import { evaluateDailyBudgetQuest } from '@/db/repositories/finance-repository';
 import { cleanUpArchivedTasks } from '@/db/repositories/task-repository';
+import { ClayShadow } from '@/constants/design';
 
 import { View } from 'react-native';
 
@@ -20,10 +21,12 @@ const TabIcon = ({ icon: Icon, focused, colors }: any) => {
           alignItems: 'center',
           justifyContent: 'center',
         },
-        focused && { backgroundColor: colors.yellow },
-      ]}
+        focused && {
+          backgroundColor: colors.accent,
+          ...ClayShadow.button,
+        }]}
     >
-      <Icon color={focused ? colors.black : colors.textSecondary} size={22} />
+      <Icon color={focused ? colors.white : colors.textMuted} size={22} />
     </View>
   );
 };
@@ -46,15 +49,12 @@ export default function TabsLayout() {
           bottom: 24,
           left: 24,
           right: 24,
-          height: 64,
-          borderRadius: 32,
-          backgroundColor: colors.surfaceHigh,
+          height: 68,
+          borderRadius: 34,
+          paddingHorizontal: 12,
+          backgroundColor: colors.surface,
           borderTopWidth: 0,
-          elevation: 8,
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: 0.15,
-          shadowRadius: 12,
+          ...ClayShadow.navBar,
           paddingBottom: 0,
         },
       }}

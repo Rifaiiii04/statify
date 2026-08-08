@@ -66,7 +66,7 @@ export function SpiderChart({ data, size = 260, maxValue }: SpiderChartProps) {
             key={`grid-${i}`}
             points={points}
             fill="none"
-            stroke={colors.border}
+            stroke={colors.accent}
             strokeWidth={1}
             opacity={0.5 + (i * 0.15)}
           />
@@ -81,24 +81,24 @@ export function SpiderChart({ data, size = 260, maxValue }: SpiderChartProps) {
               y1={cy}
               x2={endPoint.x}
               y2={endPoint.y}
-              stroke={colors.border}
+              stroke={colors.accent}
               strokeWidth={1}
-              opacity={0.4}
+              opacity={0.2}
             />
           );
         })}
 
         <Polygon
           points={dataPoints}
-          fill={colors.yellow}
+          fill={colors.accent}
           fillOpacity={0.15}
-          stroke={colors.yellow}
+          stroke={colors.accent}
           strokeWidth={2}
         />
 
         {values.map((v, i) => {
           const p = getPoint(i, v);
-          const catColor = CATEGORY_COLORS[labels[i]] || colors.yellow;
+          const catColor = CATEGORY_COLORS[labels[i]] || colors.accent;
           return (
             <Circle
               key={`dot-${i}`}

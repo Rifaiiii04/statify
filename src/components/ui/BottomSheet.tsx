@@ -1,10 +1,10 @@
 import React, { useEffect, useRef } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity, Modal,
-  Animated, Dimensions, TouchableWithoutFeedback, KeyboardAvoidingView, Platform, ScrollView,
+  Animated, TouchableWithoutFeedback, KeyboardAvoidingView, Platform, ScrollView,
 } from 'react-native';
 import { X } from 'lucide-react-native';
-import { Spacing, Radius, Typography } from '@/constants/design';
+import { Spacing, Radius, Typography, ClayShadow } from '@/constants/design';
 import { useThemeContext } from '@/context/theme-context';
 
 interface BottomSheetProps {
@@ -32,8 +32,7 @@ export function BottomSheet({ visible, onClose, title, children }: BottomSheetPr
           toValue: 1,
           duration: 200,
           useNativeDriver: true,
-        }),
-      ]).start();
+        })]).start();
     } else {
       Animated.parallel([
         Animated.timing(scale, {
@@ -45,8 +44,7 @@ export function BottomSheet({ visible, onClose, title, children }: BottomSheetPr
           toValue: 0,
           duration: 200,
           useNativeDriver: true,
-        }),
-      ]).start();
+        })]).start();
     }
   }, [visible]);
 
@@ -59,13 +57,16 @@ export function BottomSheet({ visible, onClose, title, children }: BottomSheetPr
         <Animated.View
           style={[
             styles.sheet,
-            { backgroundColor: colors.surface, borderColor: colors.border, transform: [{ scale }], opacity },
-          ]}
+            ClayShadow.cardHover,
+            { backgroundColor: colors.surface, transform: [{ scale }], opacity }]}
         >
-          <View style={[styles.header, { borderBottomColor: colors.border }]}>
+          <View style={styles.header}>
             <View style={styles.headerRow}>
               <Text style={[styles.title, { color: colors.textPrimary }]}>{title}</Text>
-              <TouchableOpacity onPress={onClose} style={[styles.closeBtn, { backgroundColor: colors.surfaceHigh }]}>
+              <TouchableOpacity
+                onPress={onClose}
+                style={[styles.closeBtn, ClayShadow.soft, { backgroundColor: colors.surfaceHigh }]}
+              >
                 <X color={colors.textSecondary} size={18} />
               </TouchableOpacity>
             </View>
@@ -87,12 +88,12 @@ export function BottomSheet({ visible, onClose, title, children }: BottomSheetPr
 const styles = StyleSheet.create({
   flex: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: Spacing.lg },
   overlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.6)',
+    position: 'absolute',
+    top: 0, left: 0, right: 0, bottom: 0,
+    backgroundColor: 'rgba(30, 41, 59, 0.3)',
   },
   sheet: {
     borderRadius: Radius.xl,
-    borderWidth: 1,
     width: '100%',
     maxWidth: 450,
     maxHeight: '85%',
@@ -101,7 +102,6 @@ const styles = StyleSheet.create({
     paddingTop: Spacing.lg,
     paddingHorizontal: Spacing.lg,
     paddingBottom: Spacing.md,
-    borderBottomWidth: 1,
   },
   headerRow: {
     flexDirection: 'row',
@@ -112,8 +112,8 @@ const styles = StyleSheet.create({
     ...Typography.titleMedium,
   },
   closeBtn: {
-    width: 32,
-    height: 32,
+    width: 36,
+    height: 36,
     borderRadius: Radius.full,
     alignItems: 'center',
     justifyContent: 'center',

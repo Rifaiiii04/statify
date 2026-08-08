@@ -31,7 +31,8 @@
           "image": "./assets/images/statify.png",
           "imageWidth": 76
         }
-      ]
+      ],
+      "expo-sqlite"
     ],
     "experiments": {
       "typedRoutes": true,

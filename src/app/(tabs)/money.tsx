@@ -1,9 +1,10 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import {
-  View, Text, StyleSheet, SafeAreaView, FlatList, TouchableOpacity, Alert
+  View, Text, StyleSheet, FlatList, TouchableOpacity, Alert
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Plus, Minus, Settings, Wallet, ArrowUpRight, ArrowDownRight } from 'lucide-react-native';
-import { Spacing, Typography, Radius } from '@/constants/design';
+import { Spacing, Typography, Radius, ClayShadow } from '@/constants/design';
 import { useThemeContext } from '@/context/theme-context';
 import { FinancialTransaction } from '@/db/schema';
 import {
@@ -32,8 +33,7 @@ export default function MoneyScreen() {
     const [tx, expenses, limit] = await Promise.all([
       getTransactions(),
       getTodayExpenses(),
-      getDailyLimit(),
-    ]);
+      getDailyLimit()]);
     setTransactions(tx);
     setTodayExpenses(expenses);
     setDailyLimitValue(limit);
@@ -69,29 +69,32 @@ export default function MoneyScreen() {
   const budgetRatio = dailyLimit > 0 ? todayExpenses / dailyLimit : 0;
   const hpPercentage = Math.max(0, 100 - (budgetRatio * 100));
   
-  let hpColor = colors.success;
-  if (budgetRatio > 0.9) hpColor = colors.danger;
-  else if (budgetRatio > 0.7) hpColor = colors.yellow;
+  let hpColor = colors.mint;
+  if (budgetRatio > 0.9) hpColor = colors.coral;
+  else if (budgetRatio > 0.7) hpColor = colors.amber;
 
   const renderHeader = () => (
     <View style={styles.headerContainer}>
       <View style={styles.headerRow}>
         <Text style={[styles.pageTitle, { color: colors.textPrimary }]}>Wallet</Text>
-        <TouchableOpacity onPress={() => { setLimitInput(dailyLimit.toString()); setShowLimitSheet(true); }}>
-          <Settings color={colors.textSecondary} size={24} />
+        <TouchableOpacity
+          style={[ClayShadow.soft, { backgroundColor: colors.surface, borderRadius: Radius.sm, padding: 10 }]}
+          onPress={() => { setLimitInput(dailyLimit.toString()); setShowLimitSheet(true); }}
+        >
+          <Settings color={colors.textSecondary} size={22} />
         </TouchableOpacity>
       </View>
       
-      <View style={[styles.budgetCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+      <View style={[styles.budgetCard, ClayShadow.card]}>
         <View style={styles.budgetHeader}>
           <Text style={[styles.budgetLabel, { color: colors.textSecondary }]}>Today's Remaining Budget</Text>
-          <Wallet color={colors.textSecondary} size={20} />
+          <Wallet color={colors.amber} size={20} />
         </View>
         <Text style={[styles.budgetText, { color: colors.textPrimary }]}>
           Rp {Math.max(0, dailyLimit - todayExpenses).toLocaleString()}
         </Text>
         
-        <View style={[styles.hpBarTrack, { backgroundColor: colors.borderHigh }]}>
+        <View style={[styles.hpBarTrack, { backgroundColor: colors.surfaceHigh }]}>
           <View style={[styles.hpBarFill, { width: `${hpPercentage}%`, backgroundColor: hpColor }]} />
         </View>
         <View style={styles.budgetMeta}>
@@ -106,19 +109,19 @@ export default function MoneyScreen() {
 
       <View style={styles.actionRow}>
         <TouchableOpacity
-          style={[styles.actionBtn, { backgroundColor: colors.danger + '22', borderColor: colors.danger }]}
+          style={[styles.actionBtn, ClayShadow.soft, { backgroundColor: colors.coralSoft }]}
           onPress={() => { setTransactionType('expense'); setShowTransactionSheet(true); }}
         >
-          <ArrowDownRight color={colors.danger} size={20} />
-          <Text style={[styles.actionBtnText, { color: colors.danger }]}>Expense</Text>
+          <ArrowDownRight color={colors.coral} size={20} />
+          <Text style={[styles.actionBtnText, { color: colors.coral }]}>Expense</Text>
         </TouchableOpacity>
         
         <TouchableOpacity
-          style={[styles.actionBtn, { backgroundColor: colors.success + '22', borderColor: colors.success }]}
+          style={[styles.actionBtn, ClayShadow.soft, { backgroundColor: colors.mintSoft }]}
           onPress={() => { setTransactionType('income'); setShowTransactionSheet(true); }}
         >
-          <ArrowUpRight color={colors.success} size={20} />
-          <Text style={[styles.actionBtnText, { color: colors.success }]}>Income</Text>
+          <ArrowUpRight color={colors.mint} size={20} />
+          <Text style={[styles.actionBtnText, { color: colors.mint }]}>Income</Text>
         </TouchableOpacity>
       </View>
       
@@ -128,14 +131,14 @@ export default function MoneyScreen() {
 
   const renderTransaction = ({ item }: { item: FinancialTransaction }) => {
     const isIncome = item.type === 'income';
-    const amountColor = isIncome ? colors.success : colors.danger;
+    const amountColor = isIncome ? colors.mint : colors.coral;
     const Icon = isIncome ? ArrowUpRight : ArrowDownRight;
     
     const date = new Date(item.created_at);
     
     return (
-      <View style={[styles.transactionCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-        <View style={[styles.txIconBox, { backgroundColor: amountColor + '22' }]}>
+      <View style={[styles.transactionCard, ClayShadow.soft]}>
+        <View style={[styles.txIconBox, { backgroundColor: amountColor + '18' }]}>
           <Icon color={amountColor} size={20} />
         </View>
         <View style={styles.txBody}>
@@ -182,7 +185,6 @@ export default function MoneyScreen() {
         showsVerticalScrollIndicator={false}
       />
 
-      {/* Transaction Sheet */}
       <BottomSheet visible={showTransactionSheet} onClose={() => setShowTransactionSheet(false)} title={`Add ${transactionType === 'income' ? 'Income' : 'Expense'}`}>
         <InputField
           placeholder="Amount (Rp)"
@@ -201,11 +203,10 @@ export default function MoneyScreen() {
           onPress={handleAddTransaction} 
           size="lg" 
           disabled={!amountInput.trim()} 
-          style={{ backgroundColor: transactionType === 'income' ? colors.success : colors.danger }} 
+          variant={transactionType === 'income' ? 'primary' : 'danger'}
         />
       </BottomSheet>
 
-      {/* Limit Sheet */}
       <BottomSheet visible={showLimitSheet} onClose={() => setShowLimitSheet(false)} title="Set Daily Budget">
         <InputField
           placeholder="Daily Limit (Rp)"
@@ -221,13 +222,12 @@ export default function MoneyScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  list: { padding: Spacing.lg, paddingBottom: 100 },
+  container: { flex: 1, paddingHorizontal: Spacing.lg, paddingTop: Spacing.lg },
+  list: { paddingBottom: 120 },
   headerContainer: { marginBottom: Spacing.md },
   headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.lg },
   pageTitle: { ...Typography.displayMedium },
   budgetCard: {
-    borderWidth: 1,
     borderRadius: Radius.lg,
     padding: Spacing.xl,
     marginBottom: Spacing.lg,
@@ -246,8 +246,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    borderWidth: 1,
-    borderRadius: Radius.md,
+    borderRadius: Radius.lg,
     paddingVertical: Spacing.md,
   },
   actionBtnText: { ...Typography.titleMedium },
@@ -255,12 +254,11 @@ const styles = StyleSheet.create({
   transactionCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 1,
-    borderRadius: Radius.md,
+    borderRadius: Radius.lg,
     padding: Spacing.md,
-    marginBottom: Spacing.sm,
+    marginBottom: Spacing.md,
   },
-  txIconBox: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center', marginRight: Spacing.md },
+  txIconBox: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center', marginRight: Spacing.md },
   txBody: { flex: 1 },
   txNote: { ...Typography.body, marginBottom: 2 },
   txDate: { ...Typography.caption },

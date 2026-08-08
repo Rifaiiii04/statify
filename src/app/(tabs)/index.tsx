@@ -1,14 +1,17 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
-  View, Text, StyleSheet, SafeAreaView,
-  FlatList, TouchableOpacity, Alert,
+  View, Text, StyleSheet,
+  FlatList, TouchableOpacity, Alert, Animated,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import Swipeable from 'react-native-gesture-handler/Swipeable';
+import { useFocusEffect } from 'expo-router';
 import {
   Plus, CheckCircle2, Circle, Trash2, XCircle, Archive,
   Dumbbell, Brain, Palette, Shield, Users, Rocket,
   Repeat, CalendarDays, RotateCcw,
 } from 'lucide-react-native';
-import { Spacing, Typography, Radius, CATEGORY_COLORS } from '@/constants/design';
+import { Spacing, Typography, Radius, CATEGORY_COLORS, ClayShadow } from '@/constants/design';
 import { useThemeContext } from '@/context/theme-context';
 import { Task, StatCategory, RecurrenceType } from '@/db/schema';
 import { getAllTasks, createTask, toggleTask, deleteTask, archiveTask } from '@/db/repositories/task-repository';
@@ -51,9 +54,11 @@ export default function TasksScreen() {
     setTasks(result);
   }, []);
 
-  useEffect(() => {
-    loadTasks();
-  }, [loadTasks]);
+  useFocusEffect(
+    useCallback(() => {
+      loadTasks();
+    }, [loadTasks])
+  );
 
   const handleCreateTask = async () => {
     if (!newTitle.trim() || newCategories.length === 0) return;
@@ -117,8 +122,7 @@ export default function TasksScreen() {
           await deleteTask(task.id);
           loadTasks();
         },
-      },
-    ]);
+      }]);
   };
 
   const activeCount = tasks.filter(t => t.status === 'active').length;
@@ -130,6 +134,12 @@ export default function TasksScreen() {
   
   const displayedTasks = tasks.filter(t => t.status === filter);
 
+  const FILTER_CONFIGS = [
+    { key: 'active' as FilterTab, label: 'Active', count: activeCount, color: colors.accent },
+    { key: 'done' as FilterTab, label: 'Done', count: doneCount, color: colors.mint },
+    { key: 'failed' as FilterTab, label: 'Fail', count: failedCount, color: colors.coral },
+    { key: 'archived' as FilterTab, label: 'Archive', count: archivedCount, color: colors.purple }];
+
   const renderHeader = () => (
     <View>
       <View style={styles.header}>
@@ -140,74 +150,36 @@ export default function TasksScreen() {
           </Text>
         </View>
         <TouchableOpacity
-          style={[styles.addBtn, { backgroundColor: colors.yellow }]}
+          style={[styles.addBtn, ClayShadow.button, { backgroundColor: colors.accent }]}
           onPress={() => setShowSheet(true)}
           activeOpacity={0.75}
         >
-          <Plus color={colors.black} size={20} />
+          <Plus color={colors.white} size={20} />
         </TouchableOpacity>
       </View>
 
-      <View style={[styles.progressBarContainer, { backgroundColor: colors.border }]}>
-        <View style={[styles.progressBarFill, { width: `${progress}%`, backgroundColor: colors.yellow }]} />
+      <View style={[styles.progressBarContainer, ClayShadow.soft]}>
+        <View style={[styles.progressBarFill, { width: `${progress}%`, backgroundColor: colors.accent }]} />
       </View>
       
       <View style={styles.filterRow}>
-        <TouchableOpacity
-          style={[
-            styles.filterTab,
-            { borderColor: colors.border, backgroundColor: colors.surfaceHigh },
-            filter === 'active' && { borderColor: colors.yellow, backgroundColor: colors.yellowSoft },
-          ]}
-          onPress={() => setFilter('active')}
-        >
-          <Text style={[styles.filterText, { color: filter === 'active' ? colors.yellow : colors.textSecondary }]}>
-            Active ({activeCount})
-          </Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity
-          style={[
-            styles.filterTab,
-            { borderColor: colors.border, backgroundColor: colors.surfaceHigh },
-            filter === 'done' && { borderColor: colors.success, backgroundColor: colors.success + '22' },
-          ]}
-          onPress={() => setFilter('done')}
-        >
-          <Text style={[styles.filterText, { color: filter === 'done' ? colors.success : colors.textSecondary }]}>
-            Done ({doneCount})
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[
-            styles.filterTab,
-            { borderColor: colors.border, backgroundColor: colors.surfaceHigh },
-            filter === 'failed' && { borderColor: colors.danger, backgroundColor: colors.danger + '22' },
-          ]}
-          onPress={() => setFilter('failed')}
-        >
-          <Text style={[styles.filterText, { color: filter === 'failed' ? colors.danger : colors.textSecondary }]}>
-            Fail ({failedCount})
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[
-            styles.filterTab,
-            { borderColor: colors.border, backgroundColor: colors.surfaceHigh },
-            filter === 'archived' && { borderColor: colors.textMuted, backgroundColor: colors.surface },
-          ]}
-          onPress={() => setFilter('archived')}
-        >
-          <Text style={[styles.filterText, { color: filter === 'archived' ? colors.textPrimary : colors.textSecondary }]}>
-            Archive ({archivedCount})
-          </Text>
-        </TouchableOpacity>
+        {FILTER_CONFIGS.map(({ key, label, count, color }) => (
+          <TouchableOpacity
+            key={key}
+            style={[
+              styles.filterTab,
+              ClayShadow.soft, filter === key && { backgroundColor: color + '18', shadowColor: color }]}
+            onPress={() => setFilter(key)}
+          >
+            <Text style={[styles.filterText, { color: filter === key ? color : colors.textSecondary }]}>
+              {label} ({count})
+            </Text>
+          </TouchableOpacity>
+        ))}
       </View>
 
       {displayedTasks.length === 0 && (
-        <View style={[styles.emptyState, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+        <View style={[styles.emptyState, ClayShadow.soft]}>
           <LayoutDashboardIcon color={colors.textMuted} size={36} />
           <Text style={[styles.emptyText, { color: colors.textMuted }]}>
             {filter === 'active' ? 'No active tasks. Tap + to add one.' : 
@@ -225,54 +197,88 @@ export default function TasksScreen() {
     const isFailed = item.status === 'failed';
     const isArchived = item.status === 'archived';
 
-    return (
-      <TouchableOpacity
-        style={[
-          styles.taskCard,
-          { backgroundColor: colors.surface, borderColor: colors.border },
-          (isCompleted || isFailed || isArchived) && { opacity: 0.6 },
-        ]}
-        onPress={() => handleToggle(item)}
-        onLongPress={() => handleLongPress(item)}
-        activeOpacity={0.7}
-      >
-        <View style={styles.checkCol}>
-          {isCompleted && <CheckCircle2 color={colors.success} size={22} />}
-          {isFailed && <XCircle color={colors.danger} size={22} />}
-          {isArchived && <Archive color={colors.textMuted} size={22} />}
-          {item.status === 'active' && <Circle color={colors.textMuted} size={22} />}
-        </View>
-        <View style={styles.taskBody}>
-          <Text
-            style={[
-              styles.taskTitle,
-              { color: colors.textPrimary },
-              (isCompleted || isFailed || isArchived) && { textDecorationLine: 'line-through', color: colors.textSecondary },
-            ]}
+    const handleSwipeArchive = async () => {
+      await archiveTask(item.id);
+      loadTasks();
+    };
+
+    const renderRightActions = (progress: Animated.AnimatedInterpolation<number>, dragX: Animated.AnimatedInterpolation<number>) => {
+      if (item.status === 'archived') return null;
+
+      const trans = dragX.interpolate({
+        inputRange: [-80, 0],
+        outputRange: [0, 80],
+        extrapolate: 'clamp',
+      });
+
+      return (
+        <Animated.View style={{ transform: [{ translateX: trans }], paddingBottom: 24, paddingRight: 24, paddingLeft: 8 }}>
+          <TouchableOpacity
+            style={[styles.archiveAction, ClayShadow.soft, { backgroundColor: colors.purple }]}
+            onPress={handleSwipeArchive}
+            activeOpacity={0.7}
           >
-            {item.title}
-          </Text>
-          <View style={styles.taskMeta}>
-            {categories.map((cat) => {
-              const CatIcon = CATEGORY_ICON_MAP[cat] || Rocket;
-              const catColor = CATEGORY_COLORS[cat] || colors.yellow;
-              return (
-                <View key={cat} style={[styles.categoryBadge, { borderColor: catColor, backgroundColor: catColor + '18' }]}>
-                  <CatIcon color={catColor} size={10} />
-                  <Text style={[styles.categoryText, { color: catColor }]}>{cat}</Text>
-                </View>
-              );
-            })}
-            <View style={[styles.recurrenceBadge, { borderColor: colors.border, backgroundColor: colors.surfaceHigh }]}>
-              <RotateCcw color={colors.textSecondary} size={10} />
-              <Text style={[styles.recurrenceText, { color: colors.textSecondary }]}>
-                {item.recurrence === 'once' ? 'Once' : item.recurrence === 'daily' ? 'Daily' : 'Weekly'}
-              </Text>
-            </View>
-            <Text style={[styles.xpText, { color: colors.textMuted }]}>+{item.xp * categories.length} XP</Text>
+            <Archive color={colors.white} size={24} />
+            <Text style={[styles.archiveActionText, { color: colors.white }]}>Archive</Text>
+          </TouchableOpacity>
+        </Animated.View>
+      );
+    };
+
+    return (
+      <View style={{ marginHorizontal: -24, marginBottom: -24 + Spacing.md }}>
+        <Swipeable 
+          renderRightActions={renderRightActions} 
+          overshootRight={false}
+        >
+          <View style={{ paddingHorizontal: 24, paddingBottom: 24 }}>
+            <TouchableOpacity
+              style={[
+                styles.taskCard,
+              ClayShadow.card, (isCompleted || isFailed || isArchived) && { opacity: 0.6 }]}
+            onPress={() => handleToggle(item)}
+            onLongPress={() => handleLongPress(item)}
+            activeOpacity={0.7}
+          >
+          <View style={styles.checkCol}>
+            {isCompleted && <CheckCircle2 color={colors.mint} size={22} />}
+            {isFailed && <XCircle color={colors.coral} size={22} />}
+            {isArchived && <Archive color={colors.textMuted} size={22} />}
+            {item.status === 'active' && <Circle color={colors.textMuted} size={22} />}
           </View>
-        </View>
-      </TouchableOpacity>
+          <View style={styles.taskBody}>
+            <Text
+              style={[
+                styles.taskTitle,
+                { color: colors.textPrimary },
+                (isCompleted || isFailed || isArchived) && { textDecorationLine: 'line-through', color: colors.textSecondary }]}
+            >
+              {item.title}
+            </Text>
+            <View style={styles.taskMeta}>
+              {categories.map((cat) => {
+                const CatIcon = CATEGORY_ICON_MAP[cat] || Rocket;
+                const catColor = CATEGORY_COLORS[cat] || colors.accent;
+                return (
+                  <View key={cat} style={[styles.categoryBadge, { backgroundColor: catColor + '18' }]}>
+                    <CatIcon color={catColor} size={10} />
+                    <Text style={[styles.categoryText, { color: catColor }]}>{cat}</Text>
+                  </View>
+                );
+              })}
+              <View style={[styles.recurrenceBadge, { backgroundColor: colors.surfaceHigh }]}>
+                <RotateCcw color={colors.textSecondary} size={10} />
+                <Text style={[styles.recurrenceText, { color: colors.textSecondary }]}>
+                  {item.recurrence === 'once' ? 'Once' : item.recurrence === 'daily' ? 'Daily' : 'Weekly'}
+                </Text>
+              </View>
+              <Text style={[styles.xpText, { color: colors.accent }]}>+{item.xp * categories.length} XP</Text>
+            </View>
+          </View>
+        </TouchableOpacity>
+          </View>
+        </Swipeable>
+      </View>
     );
   };
 
@@ -318,8 +324,8 @@ function LayoutDashboardIcon(props: any) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  list: { padding: Spacing.lg, paddingBottom: 40 },
+  container: { flex: 1, paddingHorizontal: Spacing.lg, paddingTop: Spacing.lg },
+  list: { paddingBottom: 120 },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -329,14 +335,14 @@ const styles = StyleSheet.create({
   greeting: { ...Typography.displayMedium, marginBottom: 2 },
   subGreeting: { ...Typography.bodySmall },
   addBtn: {
-    width: 44,
-    height: 44,
+    width: 48,
+    height: 48,
     borderRadius: Radius.md,
     alignItems: 'center',
     justifyContent: 'center',
   },
   progressBarContainer: {
-    height: 3,
+    height: 8,
     borderRadius: Radius.full,
     marginBottom: Spacing.lg,
     overflow: 'hidden',
@@ -352,10 +358,9 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.lg,
   },
   filterTab: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
     borderRadius: Radius.full,
-    borderWidth: 1,
   },
   filterText: { ...Typography.bodySmall, fontWeight: '500' },
   emptyState: {
@@ -363,17 +368,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 12,
-    borderRadius: Radius.md,
-    borderWidth: 1,
+    borderRadius: Radius.lg,
   },
   emptyText: { ...Typography.body, textAlign: 'center' },
   taskCard: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    borderWidth: 1,
-    borderRadius: Radius.md,
+    borderRadius: Radius.lg,
     padding: Spacing.md,
-    marginBottom: Spacing.sm,
   },
   checkCol: { marginRight: 14, paddingTop: 2 },
   taskBody: { flex: 1 },
@@ -383,21 +385,30 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
     borderRadius: Radius.full,
-    borderWidth: 1,
   },
   categoryText: { ...Typography.caption },
   recurrenceBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
     borderRadius: Radius.full,
-    borderWidth: 1,
   },
   recurrenceText: { ...Typography.caption },
-  xpText: { ...Typography.caption },
+  xpText: { ...Typography.caption, fontWeight: '600' },
+  archiveAction: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 80,
+    height: '100%',
+    borderRadius: Radius.lg,
+  },
+  archiveActionText: {
+    ...Typography.caption,
+    marginTop: 4,
+  },
 });
