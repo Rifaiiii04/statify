@@ -80,6 +80,6 @@ export async function resetDatabase(): Promise<void> {
   await db.execAsync('DROP TABLE IF EXISTS user_stats');
   await db.execAsync('DROP TABLE IF EXISTS activity_log');
   await db.execAsync('DROP TABLE IF EXISTS financial_transactions');
-  await db.execAsync('DROP TABLE IF EXISTS budget_settings');
+
   await initDatabase(db);
 }

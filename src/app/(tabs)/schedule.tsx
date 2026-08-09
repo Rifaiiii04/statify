@@ -177,6 +177,8 @@ export default function ScheduleScreen() {
               backgroundColor: taskColor,
               left: `${barLeft}%`,
               width: `${Math.max(barWidth, 14.28)}%`,
+              borderWidth: 1,
+              borderColor: '#000',
             },
           ]}
         >
@@ -247,7 +249,7 @@ export default function ScheduleScreen() {
         <View style={[
           styles.todayCard, 
           ClayShadow.card, 
-          item.parent_id ? { marginLeft: 32, padding: 12, borderRadius: Radius.lg } : {},
+          item.parent_id ? { marginLeft: 32, padding: 12 } : {},
           isCompleted && { opacity: 0.5 }, 
           overdueDays > 0 && !isCompleted && { backgroundColor: colors.coralSoft }
         ]}>
@@ -322,15 +324,7 @@ export default function ScheduleScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg, paddingTop: Math.max(insets.top, 24) + 16 }}>
-      {/* Decorative Header Background */}
-      <View style={{
-        position: 'absolute',
-        top: 0, left: 0, right: 0,
-        height: Math.max(insets.top, 24) + 120,
-        backgroundColor: colors.purpleSoft,
-        borderBottomLeftRadius: Radius.xl,
-        borderBottomRightRadius: Radius.xl,
-      }} />
+
       <View style={styles.container}>
         <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         {/* Date Header */}
@@ -376,14 +370,14 @@ export default function ScheduleScreen() {
                     key={wd.date}
                     style={[
                       styles.ganttDayCell,
-                      isToday && { backgroundColor: colors.accent, borderRadius: 10 },
+                      isToday && { backgroundColor: colors.accent, borderRadius: 4, borderWidth: 1, borderColor: '#000' },
                     ]}
                   >
                     <Text
                       style={[
                         styles.ganttDayText,
                         { color: colors.textMuted },
-                        isToday && { color: colors.white, fontWeight: '700' },
+                        isToday && { color: colors.white },
                       ]}
                     >
                       {wd.label}
@@ -467,20 +461,18 @@ const styles = StyleSheet.create({
   weekBadge: {
     paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: Radius.full,
+    borderRadius: Radius.md,
   },
-  weekBadgeText: { ...Typography.caption, fontWeight: '600' },
-  seeAll: { ...Typography.bodySmall, fontWeight: '600' },
+  weekBadgeText: { ...Typography.caption },
+  seeAll: { ...Typography.bodySmall },
 
   // Gantt
   ganttContainer: {
     padding: Spacing.md,
-    borderRadius: Radius.lg,
     overflow: 'hidden',
   },
   xpText: {
     ...Typography.caption,
-    fontWeight: '600',
   },
   ganttBody: {
     minHeight: 48,
@@ -495,14 +487,13 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 0,
     height: '100%',
-    borderRadius: 8,
+    borderRadius: 4,
     paddingHorizontal: 8,
     justifyContent: 'center',
   },
   ganttBarText: {
     ...Typography.caption,
     color: '#FFFFFF',
-    fontWeight: '700',
   },
   ganttEmpty: {
     paddingVertical: Spacing.lg,
@@ -522,7 +513,6 @@ const styles = StyleSheet.create({
   },
   ganttDayText: {
     ...Typography.caption,
-    fontWeight: '500',
   },
 
   // Banner
@@ -530,7 +520,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: Spacing.md,
-    borderRadius: Radius.lg,
     marginBottom: Spacing.lg,
   },
   bannerTitle: { ...Typography.titleMedium, marginBottom: 2 },
@@ -538,7 +527,7 @@ const styles = StyleSheet.create({
   bannerArrow: {
     width: 34,
     height: 34,
-    borderRadius: 17,
+    borderRadius: 4,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -547,7 +536,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: Spacing.md,
-    borderRadius: Radius.lg,
     marginBottom: Spacing.sm,
   },
   checkCol: {

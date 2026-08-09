@@ -51,7 +51,7 @@ export default function SettingsScreen() {
             <View style={styles.rowContent}>
               <Text style={[styles.rowTitle, { color: colors.textPrimary }]}>Theme</Text>
               <Text style={[styles.rowSub, { color: colors.textSecondary }]}>
-                Claymorphism Light
+                Neo-Brutalism
               </Text>
             </View>
           </View>
@@ -101,7 +101,7 @@ export default function SettingsScreen() {
         <View style={{ padding: Spacing.lg, paddingBottom: Spacing.xxl }}>
           <Text style={[Typography.body, { color: colors.textSecondary, marginBottom: Spacing.xl, lineHeight: 22 }]}>
             Are you sure you want to delete all your tasks, notes, pomodoro sessions, and stats?{'\n\n'}
-            <Text style={{ color: colors.coral, fontWeight: 'bold' }}>This action cannot be undone.</Text>
+            <Text style={{ color: colors.coral, fontFamily: 'Poppins_700Bold' }}>This action cannot be undone.</Text>
           </Text>
           <View style={{ gap: Spacing.md }}>
             <Button
@@ -142,7 +142,7 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.sm,
   },
   rowContent: { flex: 1 },
-  rowTitle: { ...Typography.body, fontWeight: '500' },
+  rowTitle: { ...Typography.body },
   rowSub: { ...Typography.bodySmall, marginTop: 2 },
   footer: {
     ...Typography.bodySmall,

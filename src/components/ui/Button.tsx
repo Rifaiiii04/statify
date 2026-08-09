@@ -31,7 +31,7 @@ export function Button({
   const containerVariants: Record<string, ViewStyle> = {
     primary: { backgroundColor: colors.accent, ...ClayShadow.button },
     secondary: { backgroundColor: colors.surface, ...ClayShadow.soft },
-    outline: { backgroundColor: 'transparent', borderWidth: 1.5, borderColor: colors.accent },
+    outline: { backgroundColor: colors.surface, borderWidth: 2, borderColor: '#000000', borderBottomWidth: 4, borderRightWidth: 4 },
     ghost: { backgroundColor: 'transparent' },
     danger: { backgroundColor: colors.coral, ...ClayShadow.button },
   };
@@ -39,7 +39,7 @@ export function Button({
   const textColors: Record<string, string> = {
     primary: colors.white,
     secondary: colors.textPrimary,
-    outline: colors.accent,
+    outline: colors.textPrimary,
     ghost: colors.accent,
     danger: colors.white,
   };
@@ -78,6 +78,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   icon: { marginRight: 8 },
-  text: { ...Typography.label, fontWeight: '600' as const },
+  text: { ...Typography.label },
   disabled: { opacity: 0.45 },
 });

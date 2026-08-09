@@ -490,7 +490,7 @@ export default function TasksScreen() {
                       style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surfaceHigh, paddingHorizontal: 12, paddingVertical: 6, borderRadius: Radius.full }}
                     >
                       <Plus color={colors.accent} size={14} />
-                      <Text style={{ color: colors.accent, marginLeft: 4, fontSize: 12, fontWeight: '600' }}>Subtask</Text>
+                      <Text style={{ color: colors.accent, marginLeft: 4, fontSize: 12 }}>Subtask</Text>
                     </TouchableOpacity>
                   </View>
                 )}
@@ -504,15 +504,7 @@ export default function TasksScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg, paddingTop: Math.max(insets.top, 24) + 16 }}>
-      {/* Decorative Header Background */}
-      <View style={{
-        position: 'absolute',
-        top: 0, left: 0, right: 0,
-        height: Math.max(insets.top, 24) + 120,
-        backgroundColor: colors.accentSoft,
-        borderBottomLeftRadius: Radius.xl,
-        borderBottomRightRadius: Radius.xl,
-      }} />
+
       <View style={styles.container}>
         <FlatList
         data={displayedTasks}
@@ -735,13 +727,11 @@ const styles = StyleSheet.create({
   filterTab: {
     paddingHorizontal: 10,
     paddingVertical: 6,
-    borderRadius: Radius.full,
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: 'transparent',
   },
   filterText: {
     ...Typography.caption,
-    fontWeight: '600',
   },
   emptyState: {
     padding: Spacing.xl,
@@ -777,7 +767,7 @@ const styles = StyleSheet.create({
     borderRadius: Radius.full,
   },
   recurrenceText: { ...Typography.caption },
-  xpText: { ...Typography.caption, fontWeight: '600' },
+  xpText: { ...Typography.caption },
   archiveAction: {
     justifyContent: 'center',
     alignItems: 'center',
@@ -795,7 +785,6 @@ const styles = StyleSheet.create({
     right: 24,
     width: 64,
     height: 64,
-    borderRadius: 32,
     alignItems: 'center',
     justifyContent: 'center',
     zIndex: 9999,

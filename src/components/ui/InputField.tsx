@@ -80,7 +80,7 @@ const styles = StyleSheet.create({
   rightIcon: { padding: 4 },
   input: {
     flex: 1,
-    fontFamily: 'Poppins_400Regular',
+    fontFamily: 'Poppins_600SemiBold',
     fontSize: 15,
     paddingVertical: 12,
   },

@@ -231,8 +231,8 @@ export function DatePicker({ startDate, endDate, onSelect, label = 'Schedule', m
                       style={[
                         styles.dayText,
                         { color: colors.textPrimary },
-                        isToday && !isSelected && { color: colors.accent, fontWeight: '700' },
-                        isSelected && { color: colors.white, fontWeight: '700' },
+                        isToday && !isSelected && { color: colors.accent },
+                        isSelected && { color: colors.white },
                         isPast && { color: colors.textMuted },
                       ]}
                     >
@@ -306,7 +306,6 @@ const styles = StyleSheet.create({
   },
   dayHeaderText: {
     ...Typography.caption,
-    fontWeight: '600',
   },
   daysGrid: {
     flexDirection: 'row',
@@ -335,6 +334,5 @@ const styles = StyleSheet.create({
   },
   dayText: {
     ...Typography.bodySmall,
-    fontWeight: '500',
   },
 });

@@ -55,12 +55,12 @@ export function ContributionHeatmap({ data, weeks = 20 }: ContributionHeatmapPro
   }, [data, weeks]);
 
   const getColor = (value: number): string => {
-    if (value === 0) return colors.surfaceHigh;
+    if (value === 0) return '#FFFFFF';
     const ratio = value / maxVal;
-    if (ratio <= 0.25) return colors.accent + '30';
-    if (ratio <= 0.5) return colors.accent + '60';
-    if (ratio <= 0.75) return colors.accent + '99';
-    return colors.accent;
+    if (ratio <= 0.25) return '#FEF3C7'; // Yellow soft
+    if (ratio <= 0.5) return '#F97316';  // Orange
+    if (ratio <= 0.75) return '#F43F5E'; // Red/Coral
+    return '#EAB308'; // Bright Yellow
   };
 
   const svgWidth = (weeks + 2) * (cellSize + gap);
@@ -100,9 +100,11 @@ export function ContributionHeatmap({ data, weeks = 20 }: ContributionHeatmapPro
                 y={cell.row * (cellSize + gap)}
                 width={cellSize}
                 height={cellSize}
-                rx={2}
-                ry={2}
+                rx={0}
+                ry={0}
                 fill={getColor(cell.value)}
+                stroke="#000000"
+                strokeWidth={1}
               />
             ))}
           </Svg>

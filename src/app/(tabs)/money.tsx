@@ -177,15 +177,7 @@ export default function MoneyScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.bg, paddingTop: Math.max(insets.top, 24) + 16 }]}>
-      {/* Decorative Header Background */}
-      <View style={{
-        position: 'absolute',
-        top: 0, left: 0, right: 0,
-        height: Math.max(insets.top, 24) + 120,
-        backgroundColor: colors.mintSoft,
-        borderBottomLeftRadius: Radius.xl,
-        borderBottomRightRadius: Radius.xl,
-      }} />
+
       <FlatList
         data={transactions}
         keyExtractor={item => item.id.toString()}
@@ -238,15 +230,14 @@ const styles = StyleSheet.create({
   headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.md },
   pageTitle: { ...Typography.displayMedium },
   budgetCard: {
-    borderRadius: Radius.lg,
     padding: Spacing.lg,
     marginBottom: Spacing.md,
   },
   budgetHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.xs },
   budgetLabel: { ...Typography.bodySmall, textTransform: 'uppercase', letterSpacing: 1 },
   budgetText: { ...Typography.displayLarge, marginBottom: Spacing.md },
-  hpBarTrack: { height: 8, borderRadius: Radius.full, overflow: 'hidden', marginBottom: Spacing.xs },
-  hpBarFill: { height: '100%', borderRadius: Radius.full },
+  hpBarTrack: { height: 16, borderRadius: Radius.md, overflow: 'hidden', marginBottom: Spacing.xs, borderWidth: 1, borderColor: '#000' },
+  hpBarFill: { height: '100%', borderRadius: Radius.sm },
   budgetMeta: { flexDirection: 'row', justifyContent: 'space-between' },
   budgetMetaText: { ...Typography.caption },
   actionRow: { flexDirection: 'row', gap: Spacing.md, marginBottom: Spacing.lg },
@@ -256,7 +247,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 6,
-    borderRadius: Radius.lg,
     paddingVertical: Spacing.md,
   },
   actionBtnText: { ...Typography.titleMedium },
@@ -264,11 +254,10 @@ const styles = StyleSheet.create({
   transactionCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: Radius.lg,
     padding: Spacing.md,
     marginBottom: Spacing.sm,
   },
-  txIconBox: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center', marginRight: Spacing.md },
+  txIconBox: { width: 36, height: 36, borderRadius: Radius.md, alignItems: 'center', justifyContent: 'center', marginRight: Spacing.md },
   txBody: { flex: 1 },
   txNote: { ...Typography.body, marginBottom: 2 },
   txDate: { ...Typography.caption },

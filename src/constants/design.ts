@@ -1,99 +1,99 @@
 import { ViewStyle } from 'react-native';
 
-// ─── Color Palette (True Claymorphism) ───
-const clayColors = {
-  // Backgrounds - Needs to be slightly off-white for white highlights to show
-  bg: '#F0F4F8',
-  surface: '#F0F4F8',
+// ─── Color Palette (Neo-Brutalism) ───
+const neoColors = {
+  // Backgrounds - Stark white or off-white for maximum contrast
+  bg: '#F4F4F0',
+  surface: '#FFFFFF',
   surfaceHigh: '#FFFFFF',
 
-  // Primary Accent (Light Blue - "Biru Muda")
-  accent: '#7CB9F9',
-  accentDark: '#5A9DE3',
-  accentSoft: 'rgba(124, 185, 249, 0.15)',
+  // Primary Accent (Electric Blue)
+  accent: '#0055FF',
+  accentDark: '#003399',
+  accentSoft: '#B3CCFF',
 
-  // Secondary Accents (Pastel Palette)
-  purple: '#A78BFA',
-  purpleSoft: 'rgba(167, 139, 250, 0.15)',
-  mint: '#6EE7B7',
-  mintSoft: 'rgba(110, 231, 183, 0.15)',
-  coral: '#FDA4AF',
-  coralSoft: 'rgba(253, 164, 175, 0.15)',
-  amber: '#FCD34D',
-  amberSoft: 'rgba(252, 211, 77, 0.15)',
-  pink: '#F9A8D4',
-  pinkSoft: 'rgba(249, 168, 212, 0.15)',
+  // Secondary Accents (High Saturation)
+  purple: '#B200FF',
+  purpleSoft: '#E5B3FF',
+  mint: '#00E054',
+  mintSoft: '#B3FFCB',
+  coral: '#FF4B00',
+  coralSoft: '#FFC8B3',
+  amber: '#FFDE00',
+  amberSoft: '#FFF6B3',
+  pink: '#FF007F',
+  pinkSoft: '#FFB3D9',
 
   // Text
-  textPrimary: '#334155',
-  textSecondary: '#64748B',
-  textMuted: '#94A3B8',
+  textPrimary: '#000000',
+  textSecondary: '#333333',
+  textMuted: '#666666',
 
   // Semantic
-  success: '#6EE7B7',
-  danger: '#FDA4AF',
+  success: '#10B981',
+  danger: '#F43F5E',
 
   // Utility
   white: '#FFFFFF',
-  black: '#1E293B',
+  black: '#000000',
 
   // Shadows
-  shadowColor: '#B6C4D3',
-  shadowLight: '#FFFFFF',
+  shadowColor: '#000000',
+  shadowLight: '#000000',
 
-  // Legacy aliases
-  border: '#E2E8F0',
-  borderHigh: '#CBD5E1',
-  yellow: '#7CB9F9',
-  yellowDim: '#5A9DE3',
-  yellowSoft: 'rgba(124, 185, 249, 0.15)',
+  // Legacy aliases for compatibility
+  border: '#000000',
+  borderHigh: '#000000',
+  yellow: '#EAB308',
+  yellowDim: '#CA8A04',
+  yellowSoft: '#FEF3C7',
 };
 
-export type ThemeColors = typeof clayColors;
+export type ThemeColors = typeof neoColors;
 
 export function getColors(): ThemeColors {
-  return clayColors;
+  return neoColors;
 }
 
 // ─── Spacing ───
 export const Spacing = {
   xs: 4,
-  sm: 6,
-  md: 12,
-  lg: 16,
-  xl: 24,
-  xxl: 32,
+  sm: 8,
+  md: 16,
+  lg: 24,
+  xl: 32,
+  xxl: 40,
 };
 
-// ─── Radius (Claymorphism = puffy) ───
+// ─── Radius (Neo-Brutalism = Sharp/Square) ───
 export const Radius = {
-  sm: 10,
-  md: 14,
-  lg: 18,
-  xl: 24,
-  full: 999,
+  sm: 0,
+  md: 4,
+  lg: 8,
+  xl: 12,
+  full: 999, // Kept for true circles (like dots/avatars)
 };
 
-// ─── Typography (Poppins) ───
+// ─── Typography (Heavy, Bold) ───
 export const Typography = {
-  displayLarge: { fontFamily: 'Poppins_700Bold', fontSize: 26, letterSpacing: -0.5 },
-  displayMedium: { fontFamily: 'Poppins_700Bold', fontSize: 20, letterSpacing: -0.3 },
-  titleLarge: { fontFamily: 'Poppins_600SemiBold', fontSize: 17 },
-  titleMedium: { fontFamily: 'Poppins_600SemiBold', fontSize: 15 },
-  body: { fontFamily: 'Poppins_400Regular', fontSize: 13 },
-  bodySmall: { fontFamily: 'Poppins_400Regular', fontSize: 12 },
-  caption: { fontFamily: 'Poppins_500Medium', fontSize: 10, letterSpacing: 0.5 },
-  label: { fontFamily: 'Poppins_500Medium', fontSize: 11 },
+  displayLarge: { fontFamily: 'Poppins_900Black', fontSize: 28, letterSpacing: -1 },
+  displayMedium: { fontFamily: 'Poppins_900Black', fontSize: 22, letterSpacing: -0.5 },
+  titleLarge: { fontFamily: 'Poppins_800ExtraBold', fontSize: 18, letterSpacing: -0.5 },
+  titleMedium: { fontFamily: 'Poppins_700Bold', fontSize: 16 },
+  body: { fontFamily: 'Poppins_500Medium', fontSize: 14 },
+  bodySmall: { fontFamily: 'Poppins_500Medium', fontSize: 12 },
+  caption: { fontFamily: 'Poppins_600SemiBold', fontSize: 11, letterSpacing: 0.5 },
+  label: { fontFamily: 'Poppins_700Bold', fontSize: 12, letterSpacing: 0.5, textTransform: 'uppercase' as const },
 };
 
-// ─── Category Colors (Soft Pastel, harmonious) ───
+// ─── Category Colors (High Saturation) ───
 export const CATEGORY_COLORS: Record<string, string> = {
-  Physical: '#FDA4AF',
-  Intelligence: '#7CB9F9',
-  Creativity: '#A78BFA',
-  Discipline: '#FCD34D',
-  Social: '#F9A8D4',
-  Productivity: '#6EE7B7',
+  Physical: '#FF4B00', // Coral/Orange
+  Intelligence: '#0055FF', // Blue
+  Creativity: '#FF007F', // Pink
+  Discipline: '#FFDE00', // Yellow
+  Social: '#B200FF', // Purple
+  Productivity: '#00E054', // Mint/Green
 };
 
 export const CATEGORY_ICONS: Record<string, string> = {
@@ -105,196 +105,108 @@ export const CATEGORY_ICONS: Record<string, string> = {
   Productivity: 'Rocket',
 };
 
-// ─── True Claymorphism Styles ───
-// Achieved by combining drop shadow + top/left light border + bottom/right dark border
+// ─── Neo-Brutalism Styles ───
+// Achieved by solid black borders and thick asymmetric bottom/right borders (simulating hard offset shadow)
 export const ClayStyles: Record<string, ViewStyle> = {
   card: {
-    backgroundColor: clayColors.surface,
-    borderRadius: Radius.lg,
+    backgroundColor: neoColors.surfaceHigh,
+    borderRadius: Radius.md,
     padding: Spacing.md,
     
-    // Light highlight (top-left) to make it look puffy
-    borderTopWidth: 1.5,
-    borderLeftWidth: 1.5,
-    borderTopColor: 'rgba(255, 255, 255, 0.9)',
-    borderLeftColor: 'rgba(255, 255, 255, 0.9)',
-    
-    // Darker inner shadow (bottom-right)
-    borderBottomWidth: 2,
-    borderRightWidth: 2,
-    borderBottomColor: 'rgba(0, 0, 0, 0.04)',
-    borderRightColor: 'rgba(0, 0, 0, 0.04)',
-
-    // Outer Drop Shadow
-    shadowColor: clayColors.shadowColor,
-    shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 4,
+    borderWidth: 2,
+    borderColor: '#000000',
+    borderBottomWidth: 6,
+    borderRightWidth: 6,
   },
   
   cardHover: {
-    backgroundColor: clayColors.surface,
-    borderRadius: Radius.xl,
+    backgroundColor: neoColors.surfaceHigh,
+    borderRadius: Radius.md,
     padding: Spacing.md,
     
-    borderTopWidth: 1.5,
-    borderLeftWidth: 1.5,
-    borderTopColor: 'rgba(255, 255, 255, 0.9)',
-    borderLeftColor: 'rgba(255, 255, 255, 0.9)',
-    
-    borderBottomWidth: 2,
-    borderRightWidth: 2,
-    borderBottomColor: 'rgba(0, 0, 0, 0.03)',
-    borderRightColor: 'rgba(0, 0, 0, 0.03)',
-
-    shadowColor: clayColors.shadowColor,
-    shadowOffset: { width: 6, height: 6 },
-    shadowOpacity: 0.35,
-    shadowRadius: 10,
-    elevation: 6,
+    borderWidth: 2,
+    borderColor: '#000000',
+    borderBottomWidth: 8,
+    borderRightWidth: 8,
   },
 
   button: {
-    backgroundColor: clayColors.accent,
-    borderRadius: Radius.full,
+    backgroundColor: neoColors.accent,
+    borderRadius: Radius.md,
     alignItems: 'center',
     justifyContent: 'center',
 
-    borderTopWidth: 1.5,
-    borderLeftWidth: 1.5,
-    borderTopColor: 'rgba(255, 255, 255, 0.4)',
-    borderLeftColor: 'rgba(255, 255, 255, 0.4)',
-    
-    borderBottomWidth: 1.5,
-    borderRightWidth: 1.5,
-    borderBottomColor: 'rgba(0, 0, 0, 0.1)',
-    borderRightColor: 'rgba(0, 0, 0, 0.1)',
-
-    shadowColor: clayColors.accent,
-    shadowOffset: { width: 3, height: 3 },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
-    elevation: 4,
+    borderWidth: 2,
+    borderColor: '#000000',
+    borderBottomWidth: 6,
+    borderRightWidth: 6,
   },
 
   chip: {
-    backgroundColor: clayColors.surface,
-    borderRadius: Radius.full,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
+    backgroundColor: neoColors.surface,
+    borderRadius: Radius.md,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
 
-    borderTopWidth: 1,
-    borderLeftWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.9)',
-    borderLeftColor: 'rgba(255, 255, 255, 0.9)',
-    
-    borderBottomWidth: 1,
-    borderRightWidth: 1,
-    borderBottomColor: 'rgba(0, 0, 0, 0.03)',
-    borderRightColor: 'rgba(0, 0, 0, 0.03)',
-
-    shadowColor: clayColors.shadowColor,
-    shadowOffset: { width: 2, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
-    elevation: 2,
+    borderWidth: 2,
+    borderColor: '#000000',
+    borderBottomWidth: 4,
+    borderRightWidth: 4,
   },
 
   soft: {
-    backgroundColor: clayColors.surface,
-    borderTopWidth: 1,
-    borderLeftWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.9)',
-    borderLeftColor: 'rgba(255, 255, 255, 0.9)',
-    
-    borderBottomWidth: 1,
-    borderRightWidth: 1,
-    borderBottomColor: 'rgba(0, 0, 0, 0.03)',
-    borderRightColor: 'rgba(0, 0, 0, 0.03)',
-
-    shadowColor: clayColors.shadowColor,
-    shadowOffset: { width: 2, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 2,
+    backgroundColor: neoColors.surface,
+    borderWidth: 2,
+    borderColor: '#000000',
+    borderBottomWidth: 4,
+    borderRightWidth: 4,
+    borderRadius: Radius.md,
   },
 
   input: {
-    backgroundColor: clayColors.surface,
+    backgroundColor: neoColors.surface,
     borderRadius: Radius.md,
-    paddingHorizontal: 12,
-    minHeight: 44,
+    paddingHorizontal: 16,
+    minHeight: 50,
 
-    // Inputs usually have inset shadows (sunken). 
-    // We reverse the borders to make it look debossed (pressed in)
-    borderTopWidth: 2,
-    borderLeftWidth: 2,
-    borderTopColor: 'rgba(0, 0, 0, 0.04)',
-    borderLeftColor: 'rgba(0, 0, 0, 0.04)',
-    
-    borderBottomWidth: 1.5,
-    borderRightWidth: 1.5,
-    borderBottomColor: 'rgba(255, 255, 255, 0.8)',
-    borderRightColor: 'rgba(255, 255, 255, 0.8)',
-
-    // No drop shadow for debossed look, or very subtle light shadow
+    borderWidth: 2,
+    borderColor: '#000000',
+    borderBottomWidth: 4,
+    borderRightWidth: 4,
   },
 
   navBar: {
-    backgroundColor: clayColors.surface,
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
-
-    borderTopWidth: 1.5,
-    borderLeftWidth: 1.5,
-    borderTopColor: 'rgba(255, 255, 255, 0.9)',
-    borderLeftColor: 'rgba(255, 255, 255, 0.9)',
-
-    borderRightWidth: 1.5,
-    borderRightColor: 'rgba(0, 0, 0, 0.04)',
-
-    shadowColor: clayColors.shadowColor,
-    shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 10,
-    elevation: 10, // Top shadow for android
+    backgroundColor: neoColors.surface,
+    borderTopLeftRadius: 0,
+    borderTopRightRadius: 0,
+    borderTopWidth: 3,
+    borderTopColor: '#000000',
   },
 
   fab: {
-    backgroundColor: clayColors.accent,
-    borderRadius: Radius.full,
+    backgroundColor: neoColors.accent,
+    borderRadius: Radius.md, // Square/blocky FAB
     alignItems: 'center',
     justifyContent: 'center',
 
-    borderTopWidth: 1.5,
-    borderLeftWidth: 1.5,
-    borderTopColor: 'rgba(255, 255, 255, 0.5)',
-    borderLeftColor: 'rgba(255, 255, 255, 0.5)',
-    
-    borderBottomWidth: 1.5,
-    borderRightWidth: 1.5,
-    borderBottomColor: 'rgba(0, 0, 0, 0.15)',
-    borderRightColor: 'rgba(0, 0, 0, 0.15)',
-
-    shadowColor: clayColors.accent,
-    shadowOffset: { width: 4, height: 6 },
-    shadowOpacity: 0.4,
-    shadowRadius: 8,
-    elevation: 8,
+    borderWidth: 2,
+    borderColor: '#000000',
+    borderBottomWidth: 6,
+    borderRightWidth: 6,
   },
 };
 
 // ─── Gantt Chart Colors ───
 export const GanttColors = [
-  '#F4A261', // Orange
-  '#E76F51', // Coral
-  '#2A9D8F', // Teal
-  '#E9C46A', // Yellow
-  '#264653', // Deep Blue
-  '#8AB17D', // Olive
-  '#B5838D', // Mauve
+  '#F43F5E', // Vivid Rose
+  '#F97316', // Orange
+  '#EAB308', // Yellow
+  '#84CC16', // Lime
+  '#10B981', // Emerald
+  '#06B6D4', // Cyan
+  '#3B82F6', // Blue
+  '#8B5CF6', // Violet
+  '#D946EF', // Fuchsia
 ];
 
-// Deprecate ClayShadow standalone and alias it to ClayStyles so we don't break existing files that still import ClayShadow
 export const ClayShadow = ClayStyles;

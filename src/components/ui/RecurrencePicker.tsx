@@ -127,7 +127,6 @@ const styles = StyleSheet.create({
   },
   optionText: {
     ...Typography.bodySmall,
-    fontWeight: '500',
   },
   daysRow: {
     flexDirection: 'row',
@@ -145,6 +144,5 @@ const styles = StyleSheet.create({
   },
   dayText: {
     ...Typography.caption,
-    fontWeight: '600',
   },
 });

@@ -39,7 +39,6 @@ function StatCard({ icon: Icon, iconColor, label, value, sub }: StatCardProps) {
 const cardStyles = StyleSheet.create({
   card: {
     flex: 1,
-    borderRadius: Radius.lg,
     padding: Spacing.md,
     gap: 4,
   },
@@ -98,15 +97,7 @@ export default function StatisticsScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.bg, paddingTop: Math.max(insets.top, 24) + 16 }]}>
-      {/* Decorative Header Background */}
-      <View style={{
-        position: 'absolute',
-        top: 0, left: 0, right: 0,
-        height: Math.max(insets.top, 24) + 120,
-        backgroundColor: colors.pinkSoft,
-        borderBottomLeftRadius: Radius.xl,
-        borderBottomRightRadius: Radius.xl,
-      }} />
+
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         <Text style={[styles.pageTitle, { color: colors.textPrimary }]}>Statistics</Text>
 
@@ -178,7 +169,6 @@ const styles = StyleSheet.create({
   scroll: { paddingBottom: 100 },
   pageTitle: { ...Typography.displayMedium, marginBottom: Spacing.md },
   levelCard: {
-    borderRadius: Radius.lg,
     padding: Spacing.md,
     flexDirection: 'row',
     alignItems: 'center',
@@ -196,21 +186,22 @@ const styles = StyleSheet.create({
   levelXp: { ...Typography.titleMedium },
   levelSub: { ...Typography.bodySmall, marginTop: 2 },
   xpBarTrack: {
-    height: 6,
-    borderRadius: Radius.full,
+    height: 12,
+    borderRadius: Radius.md,
+    borderWidth: 1,
+    borderColor: '#000',
     marginBottom: Spacing.md,
     overflow: 'hidden',
   },
   xpBarFill: {
     height: '100%',
-    borderRadius: Radius.full,
+    borderRadius: Radius.sm,
   },
   statsRow: { flexDirection: 'row', marginBottom: Spacing.sm },
   section: { marginTop: Spacing.sm, marginBottom: Spacing.md },
   sectionTitle: { ...Typography.titleMedium, marginBottom: 2 },
   sectionSub: { ...Typography.bodySmall, marginBottom: Spacing.sm },
   chartCard: {
-    borderRadius: Radius.lg,
     padding: Spacing.md,
     overflow: 'hidden',
   },

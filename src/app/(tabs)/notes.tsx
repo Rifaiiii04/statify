@@ -234,15 +234,7 @@ export default function NotesScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg, paddingTop: Math.max(insets.top, 24) + 16 }}>
-      {/* Decorative Header Background */}
-      <View style={{
-        position: 'absolute',
-        top: 0, left: 0, right: 0,
-        height: Math.max(insets.top, 24) + 120,
-        backgroundColor: colors.amberSoft,
-        borderBottomLeftRadius: Radius.xl,
-        borderBottomRightRadius: Radius.xl,
-      }} />
+
       <View style={styles.container}>
         <FlatList
         data={displayedNotes}
@@ -346,9 +338,10 @@ const styles = StyleSheet.create({
   filterTab: {
     paddingHorizontal: 12,
     paddingVertical: 6,
-    borderRadius: Radius.full,
+    borderWidth: 2,
+    borderColor: 'transparent',
   },
-  filterText: { ...Typography.bodySmall, fontWeight: '500' },
+  filterText: { ...Typography.bodySmall },
   emptyState: {
     padding: Spacing.xl,
     alignItems: 'center',
@@ -376,7 +369,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   noteInfo: { flex: 1 },
-  noteTitle: { ...Typography.body, fontWeight: '500', marginBottom: 2 },
+  noteTitle: { ...Typography.body, marginBottom: 2 },
   noteContent: { ...Typography.bodySmall, lineHeight: 16 },
   noteMeta: { flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap' },
   categoryBadge: {
@@ -387,13 +380,13 @@ const styles = StyleSheet.create({
     borderRadius: Radius.full,
   },
   categoryText: { ...Typography.caption },
-  xpText: { ...Typography.caption, fontWeight: '600' },
+  xpText: { ...Typography.caption },
   executedBadge: {
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: Radius.full,
   },
-  executedText: { ...Typography.caption, fontWeight: '600' },
+  executedText: { ...Typography.caption },
   detailTitle: {
     ...Typography.titleLarge,
     marginBottom: Spacing.sm,
@@ -419,7 +412,6 @@ const styles = StyleSheet.create({
     right: 24,
     width: 64,
     height: 64,
-    borderRadius: 32,
     alignItems: 'center',
     justifyContent: 'center',
     zIndex: 9999,

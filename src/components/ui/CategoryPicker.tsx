@@ -90,6 +90,5 @@ const styles = StyleSheet.create({
   },
   chipText: {
     ...Typography.bodySmall,
-    fontWeight: '500',
   },
 });

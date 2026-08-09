@@ -93,7 +93,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(30, 41, 59, 0.3)',
   },
   sheet: {
-    borderRadius: Radius.xl,
     width: '100%',
     maxWidth: 450,
     maxHeight: '85%',
@@ -114,7 +113,7 @@ const styles = StyleSheet.create({
   closeBtn: {
     width: 32,
     height: 32,
-    borderRadius: Radius.full,
+    borderRadius: Radius.md,
     alignItems: 'center',
     justifyContent: 'center',
   },

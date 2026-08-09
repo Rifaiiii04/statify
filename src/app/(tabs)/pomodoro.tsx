@@ -98,15 +98,7 @@ export default function PomodoroScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.bg, paddingTop: Math.max(insets.top, 24) + 16 }]}>
-      {/* Decorative Header Background */}
-      <View style={{
-        position: 'absolute',
-        top: 0, left: 0, right: 0,
-        height: Math.max(insets.top, 24) + 120,
-        backgroundColor: colors.coralSoft,
-        borderBottomLeftRadius: Radius.xl,
-        borderBottomRightRadius: Radius.xl,
-      }} />
+
       <View style={styles.inner}>
         <View style={styles.header}>
           <Text style={[styles.title, { color: colors.textPrimary }]}>Focus</Text>
@@ -187,13 +179,13 @@ const styles = StyleSheet.create({
   header: { paddingTop: Spacing.md, marginBottom: Spacing.lg },
   title: { ...Typography.displayMedium, marginBottom: 4 },
   phaseBadge: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  phaseDot: { width: 6, height: 6, borderRadius: 3 },
+  phaseDot: { width: 8, height: 8, borderRadius: 0 },
   phaseLabel: { ...Typography.bodySmall },
   ringContainer: { alignItems: 'center', marginBottom: Spacing.lg },
   ringTrack: {
     width: 200,
     height: 200,
-    borderRadius: 100,
+    borderRadius: Radius.md,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -210,7 +202,7 @@ const styles = StyleSheet.create({
   sessionDot: {
     width: 10,
     height: 10,
-    borderRadius: 5,
+    borderRadius: 0,
   },
   sessionText: { ...Typography.bodySmall, marginLeft: 4 },
   controls: {
@@ -222,7 +214,7 @@ const styles = StyleSheet.create({
   primaryBtn: {
     width: 64,
     height: 64,
-    borderRadius: 32,
+    borderRadius: Radius.md,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -230,7 +222,7 @@ const styles = StyleSheet.create({
   secondaryBtn: {
     width: 48,
     height: 48,
-    borderRadius: 24,
+    borderRadius: Radius.md,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -238,7 +230,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: Spacing.lg,
     padding: Spacing.md,
-    borderRadius: Radius.lg,
   },
   xpReminderText: { ...Typography.bodySmall },
 });
