@@ -37,7 +37,7 @@ export default function SettingsScreen() {
         <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: Spacing.xl }}>
           <TouchableOpacity 
             onPress={() => router.back()} 
-            style={[{ width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surfaceHigh, marginRight: 16 }, ClayShadow.soft]}
+            style={[{ width: 34, height: 34, borderRadius: 17, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surfaceHigh, marginRight: 12 }, ClayShadow.soft]}
           >
             <ChevronLeft color={colors.textPrimary} size={24} />
           </TouchableOpacity>
@@ -123,10 +123,10 @@ export default function SettingsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, paddingHorizontal: Spacing.lg, paddingTop: Spacing.lg },
-  scroll: { paddingBottom: 120 },
-  pageTitle: { ...Typography.displayMedium, marginBottom: Spacing.lg },
-  section: { marginBottom: Spacing.lg },
+  container: { flex: 1, paddingHorizontal: Spacing.lg, paddingTop: Spacing.md },
+  scroll: { paddingBottom: 100 },
+  pageTitle: { ...Typography.displayMedium, marginBottom: Spacing.md },
+  section: { marginBottom: Spacing.md },
   sectionTitle: {
     ...Typography.caption,
     textTransform: 'uppercase',
@@ -136,7 +136,7 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 14,
+    gap: 10,
     borderRadius: Radius.lg,
     padding: Spacing.md,
     marginBottom: Spacing.sm,
@@ -147,7 +147,7 @@ const styles = StyleSheet.create({
   footer: {
     ...Typography.bodySmall,
     textAlign: 'center',
-    marginTop: Spacing.xl,
-    lineHeight: 20,
+    marginTop: Spacing.lg,
+    lineHeight: 18,
   },
 });

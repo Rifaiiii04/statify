@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity, Animated,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Play, Pause, RotateCcw, CheckCircle, SkipForward } from 'lucide-react-native';
 import { Spacing, Typography, Radius, ClayShadow } from '@/constants/design';
 import { useThemeContext } from '@/context/theme-context';
@@ -16,6 +16,7 @@ type Phase = 'work' | 'break';
 
 export default function PomodoroScreen() {
   const { colors } = useThemeContext();
+  const insets = useSafeAreaInsets();
   const [phase, setPhase] = useState<Phase>('work');
   const [timeLeft, setTimeLeft] = useState(WORK_DURATION);
   const [isActive, setIsActive] = useState(false);
@@ -96,7 +97,16 @@ export default function PomodoroScreen() {
     `${Math.floor(s / 60).toString().padStart(2, '0')}:${(s % 60).toString().padStart(2, '0')}`;
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.bg }]}>
+    <View style={[styles.container, { backgroundColor: colors.bg, paddingTop: Math.max(insets.top, 24) + 16 }]}>
+      {/* Decorative Header Background */}
+      <View style={{
+        position: 'absolute',
+        top: 0, left: 0, right: 0,
+        height: Math.max(insets.top, 24) + 120,
+        backgroundColor: colors.coralSoft,
+        borderBottomLeftRadius: Radius.xl,
+        borderBottomRightRadius: Radius.xl,
+      }} />
       <View style={styles.inner}>
         <View style={styles.header}>
           <Text style={[styles.title, { color: colors.textPrimary }]}>Focus</Text>
@@ -167,40 +177,40 @@ export default function PomodoroScreen() {
           </Text>
         </View>
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
   inner: { flex: 1, paddingHorizontal: Spacing.lg },
-  header: { paddingTop: Spacing.lg, marginBottom: Spacing.xl },
-  title: { ...Typography.displayMedium, marginBottom: 6 },
+  header: { paddingTop: Spacing.md, marginBottom: Spacing.lg },
+  title: { ...Typography.displayMedium, marginBottom: 4 },
   phaseBadge: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  phaseDot: { width: 8, height: 8, borderRadius: 4 },
+  phaseDot: { width: 6, height: 6, borderRadius: 3 },
   phaseLabel: { ...Typography.bodySmall },
-  ringContainer: { alignItems: 'center', marginBottom: Spacing.xl },
+  ringContainer: { alignItems: 'center', marginBottom: Spacing.lg },
   ringTrack: {
-    width: 240,
-    height: 240,
-    borderRadius: 120,
+    width: 200,
+    height: 200,
+    borderRadius: 100,
     alignItems: 'center',
     justifyContent: 'center',
   },
   ringInner: { alignItems: 'center' },
-  timeText: { fontFamily: 'Poppins_700Bold', fontSize: 56, letterSpacing: -1 },
-  timeSub: { ...Typography.bodySmall, marginTop: 4 },
+  timeText: { fontFamily: 'Poppins_700Bold', fontSize: 44, letterSpacing: -1 },
+  timeSub: { ...Typography.bodySmall, marginTop: 2 },
   sessionRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
-    marginBottom: Spacing.xl,
+    gap: 6,
+    marginBottom: Spacing.lg,
   },
   sessionDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
   },
   sessionText: { ...Typography.bodySmall, marginLeft: 4 },
   controls: {
@@ -210,23 +220,23 @@ const styles = StyleSheet.create({
     gap: Spacing.lg,
   },
   primaryBtn: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
     alignItems: 'center',
     justifyContent: 'center',
   },
   primaryBtnActive: { opacity: 0.9 },
   secondaryBtn: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     alignItems: 'center',
     justifyContent: 'center',
   },
   xpReminder: {
     alignItems: 'center',
-    marginTop: Spacing.xl,
+    marginTop: Spacing.lg,
     padding: Spacing.md,
     borderRadius: Radius.lg,
   },

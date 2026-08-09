@@ -13,19 +13,28 @@ import {
 
 const DB_NAME = 'tasktracker.db';
 
-let dbInstance: SQLite.SQLiteDatabase | null = null;
-let initPromise: Promise<SQLite.SQLiteDatabase> | null = null;
+let dbInstance: SQLite.SQLiteDatabase | null = (globalThis as any).__dbInstance || null;
+let initPromise: Promise<SQLite.SQLiteDatabase> | null = (globalThis as any).__dbInitPromise || null;
 
 export async function getDatabase(): Promise<SQLite.SQLiteDatabase> {
   if (dbInstance) return dbInstance;
   if (initPromise) return initPromise;
   
   initPromise = (async () => {
-    dbInstance = await SQLite.openDatabaseAsync(DB_NAME);
-    await initDatabase(dbInstance);
-    return dbInstance;
+    try {
+      dbInstance = await SQLite.openDatabaseAsync(DB_NAME);
+      (globalThis as any).__dbInstance = dbInstance;
+      await initDatabase(dbInstance);
+      return dbInstance;
+    } catch (e: any) {
+      if (e.message && e.message.includes('createSyncAccessHandle')) {
+        console.error("OPFS Lock Error: Please reload the page to release the database handle.");
+      }
+      throw e;
+    }
   })();
   
+  (globalThis as any).__dbInitPromise = initPromise;
   return initPromise;
 }
 

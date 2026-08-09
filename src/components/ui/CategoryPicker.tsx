@@ -56,7 +56,7 @@ export function CategoryPicker({ selected, onSelect, multiple = false, max = 6 }
               onPress={() => handleSelect(cat)}
               activeOpacity={0.7}
             >
-              <IconComp color={isSelected ? catColor : colors.textMuted} size={14} />
+              <IconComp color={isSelected ? catColor : colors.textMuted} size={12} />
               <Text style={[
                 styles.chipText,
                 { color: colors.textSecondary },
@@ -72,7 +72,7 @@ export function CategoryPicker({ selected, onSelect, multiple = false, max = 6 }
 }
 
 const styles = StyleSheet.create({
-  container: { marginBottom: 16 },
+  container: { marginBottom: 12 },
   label: {
     ...Typography.label,
     marginBottom: Spacing.sm,
@@ -83,9 +83,9 @@ const styles = StyleSheet.create({
   chip: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
+    gap: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
     borderRadius: Radius.full,
   },
   chipText: {

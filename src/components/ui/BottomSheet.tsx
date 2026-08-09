@@ -86,7 +86,7 @@ export function BottomSheet({ visible, onClose, title, children }: BottomSheetPr
 }
 
 const styles = StyleSheet.create({
-  flex: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: Spacing.lg },
+  flex: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: Spacing.md },
   overlay: {
     position: 'absolute',
     top: 0, left: 0, right: 0, bottom: 0,
@@ -99,9 +99,9 @@ const styles = StyleSheet.create({
     maxHeight: '85%',
   },
   header: {
-    paddingTop: Spacing.lg,
+    paddingTop: Spacing.md,
     paddingHorizontal: Spacing.lg,
-    paddingBottom: Spacing.md,
+    paddingBottom: Spacing.sm,
   },
   headerRow: {
     flexDirection: 'row',
@@ -112,8 +112,8 @@ const styles = StyleSheet.create({
     ...Typography.titleMedium,
   },
   closeBtn: {
-    width: 36,
-    height: 36,
+    width: 32,
+    height: 32,
     borderRadius: Radius.full,
     alignItems: 'center',
     justifyContent: 'center',
@@ -122,7 +122,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.lg,
   },
   contentContainer: {
-    paddingTop: Spacing.md,
-    paddingBottom: Spacing.xxl,
+    paddingTop: Spacing.sm,
+    paddingBottom: Spacing.xl,
   },
 });

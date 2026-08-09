@@ -1,9 +1,10 @@
 import React, { useState, useCallback } from 'react';
 import {
   View, Text, StyleSheet,
-  FlatList, TouchableOpacity, Alert, Animated, Platform,
+  FlatList, TouchableOpacity, Alert, Platform, Animated as RNAnimated,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { TouchableOpacity as GHTouchableOpacity } from 'react-native-gesture-handler';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
 import { useFocusEffect, useRouter } from 'expo-router';
@@ -51,6 +52,7 @@ type FilterTab = 'active' | 'done' | 'failed' | 'archived';
 export default function TasksScreen() {
   const router = useRouter();
   const { colors } = useThemeContext();
+  const insets = useSafeAreaInsets();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [filter, setFilter] = useState<FilterTab>('active');
   const [showSheet, setShowSheet] = useState(false);
@@ -241,26 +243,14 @@ export default function TasksScreen() {
           <TouchableOpacity
             style={[styles.addBtn, ClayShadow.soft, { backgroundColor: colors.surfaceHigh }]}
             onPress={() => router.push('/notes' as any)}
-            activeOpacity={0.75}
           >
-            <Lightbulb color={colors.textSecondary} size={20} />
+            <Lightbulb color={colors.accent} size={20} />
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.addBtn, ClayShadow.soft, { backgroundColor: colors.surfaceHigh }]}
             onPress={() => router.push('/settings')}
-            activeOpacity={0.75}
           >
-            <Settings color={colors.textSecondary} size={20} />
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.addBtn, ClayShadow.button, { backgroundColor: colors.accent }]}
-            onPress={() => {
-              resetFormState(null);
-              setShowSheet(true);
-            }}
-            activeOpacity={0.75}
-          >
-            <Plus color={colors.white} size={20} />
+            <Settings color={colors.accent} size={20} />
           </TouchableOpacity>
         </View>
       </View>
@@ -329,7 +319,7 @@ export default function TasksScreen() {
       setArchiveModalVisible(true);
     };
 
-    const renderRightActions = (progress: Animated.AnimatedInterpolation<number>, dragX: Animated.AnimatedInterpolation<number>) => {
+    const renderRightActions = (progress: RNAnimated.AnimatedInterpolation<number>, dragX: RNAnimated.AnimatedInterpolation<number>) => {
       if (item.status === 'archived' || item.status === 'done' || isCompleted) return null;
 
       const trans = dragX.interpolate({
@@ -339,7 +329,7 @@ export default function TasksScreen() {
       });
 
       return (
-        <Animated.View style={{ transform: [{ translateX: trans }], paddingBottom: 24, paddingRight: 24, paddingLeft: 8 }}>
+        <RNAnimated.View style={{ transform: [{ translateX: trans }], paddingBottom: 24, paddingRight: 24, paddingLeft: 8 }}>
           <TouchableOpacity
             style={[styles.archiveAction, ClayShadow.soft, { backgroundColor: colors.purple }]}
             onPress={handleSwipeArchive}
@@ -348,12 +338,17 @@ export default function TasksScreen() {
             <Archive color={colors.white} size={24} />
             <Text style={[styles.archiveActionText, { color: colors.white }]}>Archive</Text>
           </TouchableOpacity>
-        </Animated.View>
+        </RNAnimated.View>
       );
     };
 
     return (
-      <View style={{ marginHorizontal: -24, marginBottom: -24 + Spacing.md }}>
+      <Animated.View 
+        entering={FadeIn} 
+        exiting={FadeOut} 
+        layout={LinearTransition.springify()}
+        style={{ marginHorizontal: -16, marginBottom: -16 + Spacing.md }}
+      >
         <Swipeable 
           renderRightActions={renderRightActions} 
           overshootRight={false}
@@ -503,13 +498,23 @@ export default function TasksScreen() {
             </GHTouchableOpacity>
           </View>
         </Swipeable>
-      </View>
+      </Animated.View>
     );
   };
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.bg }]}>
-      <FlatList
+    <View style={{ flex: 1, backgroundColor: colors.bg, paddingTop: Math.max(insets.top, 24) + 16 }}>
+      {/* Decorative Header Background */}
+      <View style={{
+        position: 'absolute',
+        top: 0, left: 0, right: 0,
+        height: Math.max(insets.top, 24) + 120,
+        backgroundColor: colors.accentSoft,
+        borderBottomLeftRadius: Radius.xl,
+        borderBottomRightRadius: Radius.xl,
+      }} />
+      <View style={styles.container}>
+        <FlatList
         data={displayedTasks}
         keyExtractor={item => item.id.toString()}
         renderItem={renderTask}
@@ -670,7 +675,20 @@ export default function TasksScreen() {
 
         <Button title="Create Task" onPress={handleCreateTask} size="lg" disabled={!newTitle.trim()} />
       </BottomSheet>
-    </SafeAreaView>
+      </View>
+
+      {/* Floating Action Button */}
+      <TouchableOpacity
+        style={[styles.fab, ClayShadow.fab, { backgroundColor: colors.accent }]}
+        onPress={() => {
+          resetFormState(null);
+          setShowSheet(true);
+        }}
+        activeOpacity={0.8}
+      >
+        <Plus color={colors.white} size={32} />
+      </TouchableOpacity>
+    </View>
   );
 }
 
@@ -680,8 +698,8 @@ function LayoutDashboardIcon(props: any) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, paddingHorizontal: Spacing.lg, paddingTop: Spacing.lg },
-  list: { paddingBottom: 120 },
+  container: { flex: 1, paddingHorizontal: Spacing.lg },
+  list: { paddingBottom: 100 },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -691,16 +709,16 @@ const styles = StyleSheet.create({
   greeting: { ...Typography.displayMedium, marginBottom: 2 },
   subGreeting: { ...Typography.bodySmall },
   addBtn: {
-    width: 48,
-    height: 48,
-    borderRadius: Radius.md,
+    width: 38,
+    height: 38,
+    borderRadius: Radius.sm,
     alignItems: 'center',
     justifyContent: 'center',
   },
   progressBarContainer: {
-    height: 8,
+    height: 6,
     borderRadius: Radius.full,
-    marginBottom: Spacing.lg,
+    marginBottom: Spacing.md,
     overflow: 'hidden',
   },
   progressBarFill: {
@@ -709,21 +727,27 @@ const styles = StyleSheet.create({
   },
   filterRow: {
     flexDirection: 'row',
+    gap: 6,
+    marginBottom: Spacing.md,
     flexWrap: 'wrap',
-    gap: Spacing.sm,
-    marginBottom: Spacing.lg,
+    justifyContent: 'space-between',
   },
   filterTab: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
     borderRadius: Radius.full,
+    borderWidth: 1,
+    borderColor: 'transparent',
   },
-  filterText: { ...Typography.bodySmall, fontWeight: '500' },
+  filterText: {
+    ...Typography.caption,
+    fontWeight: '600',
+  },
   emptyState: {
-    padding: Spacing.xxl,
+    padding: Spacing.xl,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 12,
+    gap: 8,
     borderRadius: Radius.lg,
   },
   emptyText: { ...Typography.body, textAlign: 'center' },
@@ -731,25 +755,25 @@ const styles = StyleSheet.create({
     borderRadius: Radius.lg,
     padding: Spacing.md,
   },
-  checkCol: { marginRight: 14, paddingTop: 2 },
+  checkCol: { marginRight: 10, paddingTop: 2 },
   taskBody: { flex: 1 },
-  taskTitle: { ...Typography.body, marginBottom: 8 },
-  taskMeta: { flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' },
+  taskTitle: { ...Typography.body, marginBottom: 4 },
+  taskMeta: { flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap' },
   categoryBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
+    gap: 3,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
     borderRadius: Radius.full,
   },
   categoryText: { ...Typography.caption },
   recurrenceBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
+    gap: 3,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
     borderRadius: Radius.full,
   },
   recurrenceText: { ...Typography.caption },
@@ -757,12 +781,24 @@ const styles = StyleSheet.create({
   archiveAction: {
     justifyContent: 'center',
     alignItems: 'center',
-    width: 80,
+    width: 64,
     height: '100%',
     borderRadius: Radius.lg,
   },
   archiveActionText: {
     ...Typography.caption,
     marginTop: 4,
+  },
+  fab: {
+    position: 'absolute',
+    bottom: 96,
+    right: 24,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 9999,
+    elevation: 16,
   },
 });

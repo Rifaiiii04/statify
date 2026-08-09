@@ -116,13 +116,13 @@ const styles = StyleSheet.create({
   },
   option: {
     flexGrow: 1,
-    minWidth: 100,
+    minWidth: 80,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 6,
-    paddingVertical: 12,
-    paddingHorizontal: 14,
+    gap: 4,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
     borderRadius: Radius.md,
   },
   optionText: {
@@ -132,15 +132,15 @@ const styles = StyleSheet.create({
   daysRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
+    gap: 6,
     marginTop: Spacing.sm,
   },
   dayChip: {
     flexGrow: 1,
-    minWidth: 40,
+    minWidth: 36,
     alignItems: 'center',
-    paddingVertical: 10,
-    paddingHorizontal: 10,
+    paddingVertical: 7,
+    paddingHorizontal: 8,
     borderRadius: Radius.sm,
   },
   dayText: {

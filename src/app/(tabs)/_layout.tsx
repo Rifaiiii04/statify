@@ -1,7 +1,8 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect } from 'react';
 import { Tabs } from 'expo-router';
 import { LayoutDashboard, CalendarDays, Timer, BarChart2, Wallet } from 'lucide-react-native';
 import { useThemeContext } from '@/context/theme-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { evaluateDailyBudgetQuest } from '@/db/repositories/finance-repository';
 import { cleanUpArchivedTasks } from '@/db/repositories/task-repository';
 import { ClayShadow } from '@/constants/design';
@@ -26,10 +27,10 @@ const TabIcon = ({ icon: Icon, focused, colors }: any) => {
   return (
     <View
       style={{
-        width: 48,
-        height: 48,
+        width: 40,
+        height: 40,
         position: 'relative',
-        top: 12,
+        top: 8,
         alignItems: 'center',
         justifyContent: 'center',
       }}
@@ -40,7 +41,7 @@ const TabIcon = ({ icon: Icon, focused, colors }: any) => {
             position: 'absolute',
             width: '100%',
             height: '100%',
-            borderRadius: 24,
+            borderRadius: 20,
             backgroundColor: colors.accent,
           },
           bgStyle,
@@ -48,7 +49,7 @@ const TabIcon = ({ icon: Icon, focused, colors }: any) => {
         ]}
       />
       <Animated.View style={[{ zIndex: 1 }, iconStyle]}>
-        <Icon color={focused ? colors.white : colors.textMuted} size={22} />
+        <Icon color={focused ? colors.white : colors.textMuted} size={20} />
       </Animated.View>
     </View>
   );
@@ -68,11 +69,11 @@ const FloatingTabIcon = ({ icon: Icon, focused, colors }: any) => {
     <Animated.View
       style={[
         {
-          width: 64,
-          height: 64,
-          borderRadius: 32,
+          width: 52,
+          height: 52,
+          borderRadius: 26,
           position: 'relative',
-          top: -16,
+          top: -10,
           backgroundColor: colors.accent,
           alignItems: 'center',
           justifyContent: 'center',
@@ -81,13 +82,14 @@ const FloatingTabIcon = ({ icon: Icon, focused, colors }: any) => {
         containerStyle
       ]}
     >
-      <Icon color={colors.white} size={28} />
+      <Icon color={colors.white} size={22} />
     </Animated.View>
   );
 };
 
 export default function TabsLayout() {
   const { colors } = useThemeContext();
+  const insets = useSafeAreaInsets();
 
   useEffect(() => {
     evaluateDailyBudgetQuest().catch(console.error);
@@ -101,16 +103,19 @@ export default function TabsLayout() {
         tabBarShowLabel: false,
         tabBarStyle: {
           position: 'absolute',
-          bottom: 24,
-          left: 24,
-          right: 24,
-          height: 68,
-          borderRadius: 34,
-          paddingHorizontal: 12,
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: 64 + insets.bottom,
+          borderTopLeftRadius: 24,
+          borderTopRightRadius: 24,
+          borderBottomLeftRadius: 0,
+          borderBottomRightRadius: 0,
+          paddingHorizontal: 8,
           backgroundColor: colors.surface,
           borderTopWidth: 0,
           ...ClayShadow.navBar,
-          paddingBottom: 0,
+          paddingBottom: insets.bottom,
         },
       }}
     >

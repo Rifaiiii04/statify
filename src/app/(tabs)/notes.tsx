@@ -3,7 +3,8 @@ import {
   View, Text, StyleSheet,
   FlatList, TouchableOpacity, Alert, Platform,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Plus, CheckCircle2, Lightbulb, Trash2,
   Dumbbell, Brain, Palette, Shield, Users, Rocket, ChevronLeft
@@ -31,8 +32,9 @@ const CATEGORY_ICON_MAP: Record<string, React.ComponentType<any>> = {
 type FilterTab = 'all' | 'active' | 'executed';
 
 export default function NotesScreen() {
-  const { colors } = useThemeContext();
   const router = useRouter();
+  const { colors } = useThemeContext();
+  const insets = useSafeAreaInsets();
   const [notes, setNotes] = useState<Note[]>([]);
   const [filter, setFilter] = useState<FilterTab>('all');
   const [showSheet, setShowSheet] = useState(false);
@@ -49,11 +51,15 @@ export default function NotesScreen() {
     loadNotes();
   }, [loadNotes]);
 
+  const resetForm = () => {
+    setNewTitle('');
+    setNewContent('');
+  };
+
   const handleCreateNote = async () => {
     if (!newTitle.trim()) return;
     await createNote(newTitle.trim(), newContent.trim(), 'Intelligence,Discipline,Creativity' as StatCategory);
-    setNewTitle('');
-    setNewContent('');
+    resetForm();
     setShowSheet(false);
     loadNotes();
   };
@@ -118,9 +124,9 @@ export default function NotesScreen() {
   const renderHeader = () => (
     <View>
       <View style={styles.header}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
           <TouchableOpacity onPress={() => router.back()} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-            <ChevronLeft color={colors.textPrimary} size={28} />
+            <ChevronLeft color={colors.textPrimary} size={24} />
           </TouchableOpacity>
           <View>
             <Text style={[styles.greeting, { color: colors.textPrimary }]}>Notes</Text>
@@ -129,13 +135,6 @@ export default function NotesScreen() {
             </Text>
           </View>
         </View>
-        <TouchableOpacity
-          style={[styles.addBtn, ClayShadow.button, { backgroundColor: colors.purple }]}
-          onPress={() => setShowSheet(true)}
-          activeOpacity={0.75}
-        >
-          <Plus color={colors.white} size={20} />
-        </TouchableOpacity>
       </View>
 
       <View style={styles.filterRow}>
@@ -178,58 +177,74 @@ export default function NotesScreen() {
     const mainCatColor = CATEGORY_COLORS[mainCat] || colors.accent;
 
     return (
-      <TouchableOpacity
-        style={[
-          styles.noteCard,
-          ClayShadow.card, isExecuted && { opacity: 0.6 }]}
-        onPress={() => setSelectedNote(item)}
-        onLongPress={() => handleDelete(item)}
-        activeOpacity={0.7}
+      <Animated.View
+        entering={FadeIn}
+        exiting={FadeOut}
+        layout={LinearTransition.springify()}
       >
-        <View style={styles.noteHeader}>
-          <View style={[styles.noteIconWrap, { backgroundColor: mainCatColor + '18' }]}>
-            <MainCatIcon color={mainCatColor} size={16} />
-          </View>
-          <View style={styles.noteInfo}>
-            <Text
-              style={[
-                styles.noteTitle,
-                { color: colors.textPrimary },
-                isExecuted && { textDecorationLine: 'line-through', color: colors.textSecondary }]}
-            >
-              {item.title}
-            </Text>
-            {item.content ? (
-              <Text style={[styles.noteContent, { color: colors.textSecondary }]} numberOfLines={2}>
-                {item.content}
-              </Text>
-            ) : null}
-          </View>
-          {isExecuted && <CheckCircle2 color={colors.mint} size={20} />}
-        </View>
-        <View style={styles.noteMeta}>
-          {categories.map((cat) => {
-            const catColor = CATEGORY_COLORS[cat] || colors.accent;
-            return (
-              <View key={cat} style={[styles.categoryBadge, { backgroundColor: catColor + '18' }]}>
-                <Text style={[styles.categoryText, { color: catColor }]}>{cat}</Text>
-              </View>
-            );
-          })}
-          <Text style={[styles.xpText, { color: colors.accent }]}>+{item.xp * categories.length} XP</Text>
-          {isExecuted && (
-            <View style={[styles.executedBadge, { backgroundColor: colors.mintSoft }]}>
-              <Text style={[styles.executedText, { color: colors.mint }]}>Executed</Text>
+        <TouchableOpacity
+          style={[
+            styles.noteCard,
+            ClayShadow.card, isExecuted && { opacity: 0.6 }]}
+          onPress={() => setSelectedNote(item)}
+          onLongPress={() => handleDelete(item)}
+          activeOpacity={0.7}
+        >
+          <View style={styles.noteHeader}>
+            <View style={[styles.noteIconWrap, { backgroundColor: mainCatColor + '18' }]}>
+              <MainCatIcon color={mainCatColor} size={16} />
             </View>
-          )}
-        </View>
-      </TouchableOpacity>
+            <View style={styles.noteInfo}>
+              <Text
+                style={[
+                  styles.noteTitle,
+                  { color: colors.textPrimary },
+                  isExecuted && { textDecorationLine: 'line-through', color: colors.textSecondary }]}
+              >
+                {item.title}
+              </Text>
+              {item.content ? (
+                <Text style={[styles.noteContent, { color: colors.textSecondary }]} numberOfLines={2}>
+                  {item.content}
+                </Text>
+              ) : null}
+            </View>
+            {isExecuted && <CheckCircle2 color={colors.mint} size={20} />}
+          </View>
+          <View style={styles.noteMeta}>
+            {categories.map((cat) => {
+              const catColor = CATEGORY_COLORS[cat] || colors.accent;
+              return (
+                <View key={cat} style={[styles.categoryBadge, { backgroundColor: catColor + '18' }]}>
+                  <Text style={[styles.categoryText, { color: catColor }]}>{cat}</Text>
+                </View>
+              );
+            })}
+            <Text style={[styles.xpText, { color: colors.accent }]}>+{item.xp * categories.length} XP</Text>
+            {isExecuted && (
+              <View style={[styles.executedBadge, { backgroundColor: colors.mintSoft }]}>
+                <Text style={[styles.executedText, { color: colors.mint }]}>Executed</Text>
+              </View>
+            )}
+          </View>
+        </TouchableOpacity>
+      </Animated.View>
     );
   };
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.bg }]}>
-      <FlatList
+    <View style={{ flex: 1, backgroundColor: colors.bg, paddingTop: Math.max(insets.top, 24) + 16 }}>
+      {/* Decorative Header Background */}
+      <View style={{
+        position: 'absolute',
+        top: 0, left: 0, right: 0,
+        height: Math.max(insets.top, 24) + 120,
+        backgroundColor: colors.amberSoft,
+        borderBottomLeftRadius: Radius.xl,
+        borderBottomRightRadius: Radius.xl,
+      }} />
+      <View style={styles.container}>
+        <FlatList
         data={displayedNotes}
         keyExtractor={item => item.id.toString()}
         renderItem={renderNote}
@@ -295,44 +310,50 @@ export default function NotesScreen() {
           </View>
         )}
       </BottomSheet>
-    </SafeAreaView>
+
+      {/* Floating Action Button */}
+      <TouchableOpacity
+        style={[styles.fab, ClayShadow.fab, { backgroundColor: colors.accent }]}
+        onPress={() => {
+          resetForm();
+          setShowSheet(true);
+        }}
+        activeOpacity={0.8}
+      >
+        <Plus color={colors.white} size={32} />
+      </TouchableOpacity>
+      </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, paddingHorizontal: Spacing.lg, paddingTop: Spacing.lg },
-  list: { paddingBottom: 120 },
+  container: { flex: 1, paddingHorizontal: Spacing.lg, paddingTop: Spacing.md },
+  list: { paddingBottom: 100 },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     marginBottom: Spacing.md,
   },
   greeting: { ...Typography.displayMedium, marginBottom: 2 },
   subGreeting: { ...Typography.bodySmall },
-  addBtn: {
-    width: 48,
-    height: 48,
-    borderRadius: Radius.md,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   filterRow: {
     flexDirection: 'row',
     gap: Spacing.sm,
-    marginBottom: Spacing.lg,
+    marginBottom: Spacing.md,
   },
   filterTab: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
     borderRadius: Radius.full,
   },
   filterText: { ...Typography.bodySmall, fontWeight: '500' },
   emptyState: {
-    padding: Spacing.xxl,
+    padding: Spacing.xl,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 12,
+    gap: 8,
     borderRadius: Radius.lg,
   },
   emptyText: { ...Typography.body, textAlign: 'center' },
@@ -344,32 +365,32 @@ const styles = StyleSheet.create({
   noteHeader: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    gap: 12,
-    marginBottom: 8,
+    gap: 8,
+    marginBottom: 6,
   },
   noteIconWrap: {
-    width: 40,
-    height: 40,
+    width: 32,
+    height: 32,
     borderRadius: Radius.sm,
     alignItems: 'center',
     justifyContent: 'center',
   },
   noteInfo: { flex: 1 },
   noteTitle: { ...Typography.body, fontWeight: '500', marginBottom: 2 },
-  noteContent: { ...Typography.bodySmall, lineHeight: 18 },
-  noteMeta: { flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' },
+  noteContent: { ...Typography.bodySmall, lineHeight: 16 },
+  noteMeta: { flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap' },
   categoryBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
     borderRadius: Radius.full,
   },
   categoryText: { ...Typography.caption },
   xpText: { ...Typography.caption, fontWeight: '600' },
   executedBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
     borderRadius: Radius.full,
   },
   executedText: { ...Typography.caption, fontWeight: '600' },
@@ -379,7 +400,7 @@ const styles = StyleSheet.create({
   },
   detailContent: {
     ...Typography.body,
-    lineHeight: 24,
+    lineHeight: 20,
     marginBottom: Spacing.lg,
   },
   detailMeta: {
@@ -391,5 +412,17 @@ const styles = StyleSheet.create({
   detailActions: {
     gap: Spacing.md,
     marginTop: Spacing.md,
+  },
+  fab: {
+    position: 'absolute',
+    bottom: 96,
+    right: 24,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 9999,
+    elevation: 16,
   },
 });

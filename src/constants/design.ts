@@ -58,32 +58,32 @@ export function getColors(): ThemeColors {
 // ─── Spacing ───
 export const Spacing = {
   xs: 4,
-  sm: 8,
-  md: 16,
-  lg: 24,
-  xl: 32,
-  xxl: 48,
+  sm: 6,
+  md: 12,
+  lg: 16,
+  xl: 24,
+  xxl: 32,
 };
 
 // ─── Radius (Claymorphism = puffy) ───
 export const Radius = {
-  sm: 14,
-  md: 20,
-  lg: 28,
-  xl: 36,
+  sm: 10,
+  md: 14,
+  lg: 18,
+  xl: 24,
   full: 999,
 };
 
 // ─── Typography (Poppins) ───
 export const Typography = {
-  displayLarge: { fontFamily: 'Poppins_700Bold', fontSize: 32, letterSpacing: -0.5 },
-  displayMedium: { fontFamily: 'Poppins_700Bold', fontSize: 24, letterSpacing: -0.3 },
-  titleLarge: { fontFamily: 'Poppins_600SemiBold', fontSize: 20 },
-  titleMedium: { fontFamily: 'Poppins_600SemiBold', fontSize: 17 },
-  body: { fontFamily: 'Poppins_400Regular', fontSize: 15 },
-  bodySmall: { fontFamily: 'Poppins_400Regular', fontSize: 13 },
-  caption: { fontFamily: 'Poppins_500Medium', fontSize: 11, letterSpacing: 0.5 },
-  label: { fontFamily: 'Poppins_500Medium', fontSize: 13 },
+  displayLarge: { fontFamily: 'Poppins_700Bold', fontSize: 26, letterSpacing: -0.5 },
+  displayMedium: { fontFamily: 'Poppins_700Bold', fontSize: 20, letterSpacing: -0.3 },
+  titleLarge: { fontFamily: 'Poppins_600SemiBold', fontSize: 17 },
+  titleMedium: { fontFamily: 'Poppins_600SemiBold', fontSize: 15 },
+  body: { fontFamily: 'Poppins_400Regular', fontSize: 13 },
+  bodySmall: { fontFamily: 'Poppins_400Regular', fontSize: 12 },
+  caption: { fontFamily: 'Poppins_500Medium', fontSize: 10, letterSpacing: 0.5 },
+  label: { fontFamily: 'Poppins_500Medium', fontSize: 11 },
 };
 
 // ─── Category Colors (Soft Pastel, harmonious) ───
@@ -114,23 +114,23 @@ export const ClayStyles: Record<string, ViewStyle> = {
     padding: Spacing.md,
     
     // Light highlight (top-left) to make it look puffy
-    borderTopWidth: 2,
-    borderLeftWidth: 2,
+    borderTopWidth: 1.5,
+    borderLeftWidth: 1.5,
     borderTopColor: 'rgba(255, 255, 255, 0.9)',
     borderLeftColor: 'rgba(255, 255, 255, 0.9)',
     
     // Darker inner shadow (bottom-right)
-    borderBottomWidth: 3,
-    borderRightWidth: 3,
+    borderBottomWidth: 2,
+    borderRightWidth: 2,
     borderBottomColor: 'rgba(0, 0, 0, 0.04)',
     borderRightColor: 'rgba(0, 0, 0, 0.04)',
 
     // Outer Drop Shadow
     shadowColor: clayColors.shadowColor,
-    shadowOffset: { width: 6, height: 6 },
-    shadowOpacity: 0.4,
-    shadowRadius: 12,
-    elevation: 8,
+    shadowOffset: { width: 4, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
   },
   
   cardHover: {
@@ -138,21 +138,21 @@ export const ClayStyles: Record<string, ViewStyle> = {
     borderRadius: Radius.xl,
     padding: Spacing.md,
     
-    borderTopWidth: 2,
-    borderLeftWidth: 2,
+    borderTopWidth: 1.5,
+    borderLeftWidth: 1.5,
     borderTopColor: 'rgba(255, 255, 255, 0.9)',
     borderLeftColor: 'rgba(255, 255, 255, 0.9)',
     
-    borderBottomWidth: 3,
-    borderRightWidth: 3,
+    borderBottomWidth: 2,
+    borderRightWidth: 2,
     borderBottomColor: 'rgba(0, 0, 0, 0.03)',
     borderRightColor: 'rgba(0, 0, 0, 0.03)',
 
     shadowColor: clayColors.shadowColor,
-    shadowOffset: { width: 10, height: 10 },
-    shadowOpacity: 0.5,
-    shadowRadius: 16,
-    elevation: 12,
+    shadowOffset: { width: 6, height: 6 },
+    shadowOpacity: 0.35,
+    shadowRadius: 10,
+    elevation: 6,
   },
 
   button: {
@@ -161,80 +161,80 @@ export const ClayStyles: Record<string, ViewStyle> = {
     alignItems: 'center',
     justifyContent: 'center',
 
-    borderTopWidth: 2,
-    borderLeftWidth: 2,
+    borderTopWidth: 1.5,
+    borderLeftWidth: 1.5,
     borderTopColor: 'rgba(255, 255, 255, 0.4)',
     borderLeftColor: 'rgba(255, 255, 255, 0.4)',
     
-    borderBottomWidth: 2,
-    borderRightWidth: 2,
+    borderBottomWidth: 1.5,
+    borderRightWidth: 1.5,
     borderBottomColor: 'rgba(0, 0, 0, 0.1)',
     borderRightColor: 'rgba(0, 0, 0, 0.1)',
 
     shadowColor: clayColors.accent,
-    shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 0.4,
-    shadowRadius: 8,
-    elevation: 6,
+    shadowOffset: { width: 3, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 4,
   },
 
   chip: {
     backgroundColor: clayColors.surface,
     borderRadius: Radius.full,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
 
-    borderTopWidth: 1.5,
-    borderLeftWidth: 1.5,
+    borderTopWidth: 1,
+    borderLeftWidth: 1,
     borderTopColor: 'rgba(255, 255, 255, 0.9)',
     borderLeftColor: 'rgba(255, 255, 255, 0.9)',
     
-    borderBottomWidth: 1.5,
-    borderRightWidth: 1.5,
+    borderBottomWidth: 1,
+    borderRightWidth: 1,
     borderBottomColor: 'rgba(0, 0, 0, 0.03)',
     borderRightColor: 'rgba(0, 0, 0, 0.03)',
 
     shadowColor: clayColors.shadowColor,
     shadowOffset: { width: 2, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
     elevation: 2,
   },
 
   soft: {
     backgroundColor: clayColors.surface,
-    borderTopWidth: 1.5,
-    borderLeftWidth: 1.5,
+    borderTopWidth: 1,
+    borderLeftWidth: 1,
     borderTopColor: 'rgba(255, 255, 255, 0.9)',
     borderLeftColor: 'rgba(255, 255, 255, 0.9)',
     
-    borderBottomWidth: 1.5,
-    borderRightWidth: 1.5,
+    borderBottomWidth: 1,
+    borderRightWidth: 1,
     borderBottomColor: 'rgba(0, 0, 0, 0.03)',
     borderRightColor: 'rgba(0, 0, 0, 0.03)',
 
     shadowColor: clayColors.shadowColor,
-    shadowOffset: { width: 3, height: 3 },
-    shadowOpacity: 0.25,
-    shadowRadius: 6,
-    elevation: 3,
+    shadowOffset: { width: 2, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 2,
   },
 
   input: {
     backgroundColor: clayColors.surface,
     borderRadius: Radius.md,
-    paddingHorizontal: 16,
-    minHeight: 52,
+    paddingHorizontal: 12,
+    minHeight: 44,
 
     // Inputs usually have inset shadows (sunken). 
     // We reverse the borders to make it look debossed (pressed in)
-    borderTopWidth: 3,
-    borderLeftWidth: 3,
+    borderTopWidth: 2,
+    borderLeftWidth: 2,
     borderTopColor: 'rgba(0, 0, 0, 0.04)',
     borderLeftColor: 'rgba(0, 0, 0, 0.04)',
     
-    borderBottomWidth: 2,
-    borderRightWidth: 2,
+    borderBottomWidth: 1.5,
+    borderRightWidth: 1.5,
     borderBottomColor: 'rgba(255, 255, 255, 0.8)',
     borderRightColor: 'rgba(255, 255, 255, 0.8)',
 
@@ -243,25 +243,58 @@ export const ClayStyles: Record<string, ViewStyle> = {
 
   navBar: {
     backgroundColor: clayColors.surface,
-    borderRadius: 40,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
 
-    borderTopWidth: 2,
-    borderLeftWidth: 2,
+    borderTopWidth: 1.5,
+    borderLeftWidth: 1.5,
     borderTopColor: 'rgba(255, 255, 255, 0.9)',
     borderLeftColor: 'rgba(255, 255, 255, 0.9)',
 
-    borderBottomWidth: 3,
-    borderRightWidth: 3,
-    borderBottomColor: 'rgba(0, 0, 0, 0.04)',
+    borderRightWidth: 1.5,
     borderRightColor: 'rgba(0, 0, 0, 0.04)',
 
     shadowColor: clayColors.shadowColor,
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.3,
-    shadowRadius: 20,
-    elevation: 12,
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 10,
+    elevation: 10, // Top shadow for android
+  },
+
+  fab: {
+    backgroundColor: clayColors.accent,
+    borderRadius: Radius.full,
+    alignItems: 'center',
+    justifyContent: 'center',
+
+    borderTopWidth: 1.5,
+    borderLeftWidth: 1.5,
+    borderTopColor: 'rgba(255, 255, 255, 0.5)',
+    borderLeftColor: 'rgba(255, 255, 255, 0.5)',
+    
+    borderBottomWidth: 1.5,
+    borderRightWidth: 1.5,
+    borderBottomColor: 'rgba(0, 0, 0, 0.15)',
+    borderRightColor: 'rgba(0, 0, 0, 0.15)',
+
+    shadowColor: clayColors.accent,
+    shadowOffset: { width: 4, height: 6 },
+    shadowOpacity: 0.4,
+    shadowRadius: 8,
+    elevation: 8,
   },
 };
+
+// ─── Gantt Chart Colors ───
+export const GanttColors = [
+  '#F4A261', // Orange
+  '#E76F51', // Coral
+  '#2A9D8F', // Teal
+  '#E9C46A', // Yellow
+  '#264653', // Deep Blue
+  '#8AB17D', // Olive
+  '#B5838D', // Mauve
+];
 
 // Deprecate ClayShadow standalone and alias it to ClayStyles so we don't break existing files that still import ClayShadow
 export const ClayShadow = ClayStyles;

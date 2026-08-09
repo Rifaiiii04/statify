@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import {
   View, Text, StyleSheet, ScrollView,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Zap, CheckCircle2, Timer, TrendingUp, Lightbulb, Flame } from 'lucide-react-native';
 import { Spacing, Typography, Radius, ClayShadow } from '@/constants/design';
 import { useThemeContext } from '@/context/theme-context';
@@ -50,6 +50,7 @@ const cardStyles = StyleSheet.create({
 
 export default function StatisticsScreen() {
   const { colors } = useThemeContext();
+  const insets = useSafeAreaInsets();
   const [stats, setStats] = useState<UserStats | null>(null);
   const [heatmapData, setHeatmapData] = useState<Record<string, number>>({});
   const [streak, setStreak] = useState(0);
@@ -96,7 +97,16 @@ export default function StatisticsScreen() {
   } : {};
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.bg }]}>
+    <View style={[styles.container, { backgroundColor: colors.bg, paddingTop: Math.max(insets.top, 24) + 16 }]}>
+      {/* Decorative Header Background */}
+      <View style={{
+        position: 'absolute',
+        top: 0, left: 0, right: 0,
+        height: Math.max(insets.top, 24) + 120,
+        backgroundColor: colors.pinkSoft,
+        borderBottomLeftRadius: Radius.xl,
+        borderBottomRightRadius: Radius.xl,
+      }} />
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         <Text style={[styles.pageTitle, { color: colors.textPrimary }]}>Statistics</Text>
 
@@ -159,56 +169,56 @@ export default function StatisticsScreen() {
           </View>
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, paddingHorizontal: Spacing.lg, paddingTop: Spacing.lg },
-  scroll: { paddingBottom: 120 },
-  pageTitle: { ...Typography.displayMedium, marginBottom: Spacing.lg },
+  container: { flex: 1, paddingHorizontal: Spacing.lg, paddingTop: Spacing.md },
+  scroll: { paddingBottom: 100 },
+  pageTitle: { ...Typography.displayMedium, marginBottom: Spacing.md },
   levelCard: {
     borderRadius: Radius.lg,
-    padding: Spacing.lg,
+    padding: Spacing.md,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: Spacing.sm,
   },
-  levelLeft: { flexDirection: 'row', alignItems: 'center', gap: 16 },
+  levelLeft: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   levelBadge: {
     ...Typography.titleMedium,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
     borderRadius: Radius.sm,
     overflow: 'hidden',
   },
   levelXp: { ...Typography.titleMedium },
   levelSub: { ...Typography.bodySmall, marginTop: 2 },
   xpBarTrack: {
-    height: 8,
+    height: 6,
     borderRadius: Radius.full,
-    marginBottom: Spacing.lg,
+    marginBottom: Spacing.md,
     overflow: 'hidden',
   },
   xpBarFill: {
     height: '100%',
     borderRadius: Radius.full,
   },
-  statsRow: { flexDirection: 'row', marginBottom: Spacing.md },
-  section: { marginTop: Spacing.md, marginBottom: Spacing.lg },
+  statsRow: { flexDirection: 'row', marginBottom: Spacing.sm },
+  section: { marginTop: Spacing.sm, marginBottom: Spacing.md },
   sectionTitle: { ...Typography.titleMedium, marginBottom: 2 },
-  sectionSub: { ...Typography.bodySmall, marginBottom: Spacing.md },
+  sectionSub: { ...Typography.bodySmall, marginBottom: Spacing.sm },
   chartCard: {
     borderRadius: Radius.lg,
     padding: Spacing.md,
     overflow: 'hidden',
   },
   emptyChart: {
-    padding: Spacing.xxl,
+    padding: Spacing.xl,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 12,
+    gap: 8,
   },
   emptyText: { ...Typography.body, textAlign: 'center' },
 });

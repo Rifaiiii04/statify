@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import {
   View, Text, StyleSheet, FlatList, TouchableOpacity, Alert
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Plus, Minus, Settings, Wallet, ArrowUpRight, ArrowDownRight } from 'lucide-react-native';
 import { Spacing, Typography, Radius, ClayShadow } from '@/constants/design';
 import { useThemeContext } from '@/context/theme-context';
@@ -17,6 +17,7 @@ import { useFocusEffect } from 'expo-router';
 
 export default function MoneyScreen() {
   const { colors } = useThemeContext();
+  const insets = useSafeAreaInsets();
   const [transactions, setTransactions] = useState<FinancialTransaction[]>([]);
   const [todayExpenses, setTodayExpenses] = useState(0);
   const [dailyLimit, setDailyLimitValue] = useState(50000);
@@ -175,7 +176,16 @@ export default function MoneyScreen() {
   };
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.bg }]}>
+    <View style={[styles.container, { backgroundColor: colors.bg, paddingTop: Math.max(insets.top, 24) + 16 }]}>
+      {/* Decorative Header Background */}
+      <View style={{
+        position: 'absolute',
+        top: 0, left: 0, right: 0,
+        height: Math.max(insets.top, 24) + 120,
+        backgroundColor: colors.mintSoft,
+        borderBottomLeftRadius: Radius.xl,
+        borderBottomRightRadius: Radius.xl,
+      }} />
       <FlatList
         data={transactions}
         keyExtractor={item => item.id.toString()}
@@ -217,35 +227,35 @@ export default function MoneyScreen() {
         />
         <Button title="Save Limit" onPress={handleSetLimit} size="lg" disabled={!limitInput.trim()} />
       </BottomSheet>
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, paddingHorizontal: Spacing.lg, paddingTop: Spacing.lg },
-  list: { paddingBottom: 120 },
-  headerContainer: { marginBottom: Spacing.md },
-  headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.lg },
+  container: { flex: 1, paddingHorizontal: Spacing.lg, paddingTop: Spacing.md },
+  list: { paddingBottom: 100 },
+  headerContainer: { marginBottom: Spacing.sm },
+  headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.md },
   pageTitle: { ...Typography.displayMedium },
   budgetCard: {
     borderRadius: Radius.lg,
-    padding: Spacing.xl,
-    marginBottom: Spacing.lg,
+    padding: Spacing.lg,
+    marginBottom: Spacing.md,
   },
-  budgetHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.sm },
+  budgetHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.xs },
   budgetLabel: { ...Typography.bodySmall, textTransform: 'uppercase', letterSpacing: 1 },
-  budgetText: { ...Typography.displayLarge, marginBottom: Spacing.lg },
-  hpBarTrack: { height: 12, borderRadius: Radius.full, overflow: 'hidden', marginBottom: Spacing.sm },
+  budgetText: { ...Typography.displayLarge, marginBottom: Spacing.md },
+  hpBarTrack: { height: 8, borderRadius: Radius.full, overflow: 'hidden', marginBottom: Spacing.xs },
   hpBarFill: { height: '100%', borderRadius: Radius.full },
   budgetMeta: { flexDirection: 'row', justifyContent: 'space-between' },
   budgetMetaText: { ...Typography.caption },
-  actionRow: { flexDirection: 'row', gap: Spacing.md, marginBottom: Spacing.xl },
+  actionRow: { flexDirection: 'row', gap: Spacing.md, marginBottom: Spacing.lg },
   actionBtn: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
+    gap: 6,
     borderRadius: Radius.lg,
     paddingVertical: Spacing.md,
   },
@@ -256,9 +266,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: Radius.lg,
     padding: Spacing.md,
-    marginBottom: Spacing.md,
+    marginBottom: Spacing.sm,
   },
-  txIconBox: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center', marginRight: Spacing.md },
+  txIconBox: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center', marginRight: Spacing.md },
   txBody: { flex: 1 },
   txNote: { ...Typography.body, marginBottom: 2 },
   txDate: { ...Typography.caption },

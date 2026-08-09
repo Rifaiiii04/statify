@@ -1,17 +1,19 @@
 import React, { useState, useCallback } from 'react';
 import {
-  View, Text, StyleSheet, ScrollView, TouchableOpacity, FlatList,
+  View, Text, StyleSheet, ScrollView, TouchableOpacity, FlatList, Alert
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from 'expo-router';
 import {
   CalendarDays, CheckCircle2, Circle, Clock,
   Dumbbell, Brain, Palette, Shield, Users, Rocket, ChevronRight,
 } from 'lucide-react-native';
-import { Spacing, Typography, Radius, CATEGORY_COLORS, ClayShadow } from '@/constants/design';
+import { Spacing, Typography, Radius, CATEGORY_COLORS, ClayShadow, GanttColors } from '@/constants/design';
 import { useThemeContext } from '@/context/theme-context';
 import { Task, StatCategory } from '@/db/schema';
-import { getScheduledTasks, getActiveTasks } from '@/db/repositories/task-repository';
+import { getScheduledTasks, getActiveTasks, toggleTask } from '@/db/repositories/task-repository';
+import { addXp, removeXp, logActivity, removeActivity } from '@/db/repositories/stats-repository';
 
 const CATEGORY_ICON_MAP: Record<string, React.ComponentType<any>> = {
   Physical: Dumbbell,
@@ -58,10 +60,8 @@ function formatDateHeader(dateStr: string): { day: number; weekday: string; mont
   };
 }
 
-// Gantt bar color based on first category
 function getTaskColor(task: Task): string {
-  const cat = task.category.split(',')[0];
-  return CATEGORY_COLORS[cat] || '#7CB9F9';
+  return GanttColors[task.id % GanttColors.length];
 }
 
 function getOverdueDays(task: Task, todayStr: string): number {
@@ -80,12 +80,15 @@ function getOverdueDays(task: Task, todayStr: string): number {
 
 export default function ScheduleScreen() {
   const { colors } = useThemeContext();
+  const insets = useSafeAreaInsets();
   const today = getTodayString();
   const headerInfo = formatDateHeader(today);
   const weekDates = getWeekDates();
 
   const [weekTasks, setWeekTasks] = useState<Task[]>([]);
   const [todayTasks, setTodayTasks] = useState<Task[]>([]);
+  const [allActiveTasks, setAllActiveTasks] = useState<Task[]>([]);
+  const [expandedTasks, setExpandedTasks] = useState<number[]>([]);
 
   const loadData = useCallback(async () => {
     // Gantt chart tasks
@@ -120,6 +123,7 @@ export default function ScheduleScreen() {
       return false;
     });
     
+    setAllActiveTasks(activeTasks);
     setTodayTasks(tTasks);
   }, [today]);
 
@@ -203,55 +207,132 @@ export default function ScheduleScreen() {
       return '';
     })();
 
+    const toggleExpand = (id: number) => {
+      setExpandedTasks(prev => 
+        prev.includes(id) ? prev.filter(taskId => taskId !== id) : [...prev, id]
+      );
+    };
+
+    const handleToggle = async () => {
+      if (item.is_system) {
+        Alert.alert('System Quest', 'This is an automatic daily quest. Edit your budget in the Money tab.');
+        return;
+      }
+      try {
+        const result = await toggleTask(item.id, item.completed);
+        const cats = result.category.split(',') as StatCategory[];
+        if (result.completed) {
+          for (const cat of cats) {
+            await addXp(result.xp, cat);
+            await logActivity('task', result.xp, cat);
+          }
+        } else {
+          for (const cat of cats) {
+            await removeXp(result.xp, cat);
+            await removeActivity('task', result.xp, cat);
+          }
+        }
+        loadData();
+      } catch (e: any) {
+        Alert.alert('Error', 'Failed to toggle task.');
+      }
+    };
+
     return (
-      <View style={[styles.todayCard, ClayShadow.card, isCompleted && { opacity: 0.5 }, overdueDays > 0 && !isCompleted && { backgroundColor: colors.coralSoft }]}>
-        <View style={[styles.todayIconWrap, { backgroundColor: catColor + '18' }]}>
-          <CatIcon color={catColor} size={18} />
-        </View>
-        <View style={styles.todayInfo}>
-          <Text
-            style={[
-              styles.todayTitle,
-              { color: colors.textPrimary },
-              isCompleted && { textDecorationLine: 'line-through', color: colors.textSecondary },
-              overdueDays > 0 && !isCompleted && { color: colors.coral }
-            ]}
-            numberOfLines={2}
+      <Animated.View 
+        entering={FadeIn} 
+        exiting={FadeOut} 
+        layout={LinearTransition.springify()}
+      >
+        <View style={[
+          styles.todayCard, 
+          ClayShadow.card, 
+          item.parent_id ? { marginLeft: 32, padding: 12, borderRadius: Radius.lg } : {},
+          isCompleted && { opacity: 0.5 }, 
+          overdueDays > 0 && !isCompleted && { backgroundColor: colors.coralSoft }
+        ]}>
+          <TouchableOpacity 
+            style={styles.checkCol}
+            onPress={handleToggle}
+            disabled={isCompleted || item.status === 'done'}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           >
-            {item.title}
-          </Text>
-          <View style={styles.todayMeta}>
-            {scheduleTime ? (
-              <View style={styles.todayMetaItem}>
-                <CalendarDays color={colors.textMuted} size={11} />
-                <Text style={[styles.todayMetaText, { color: colors.textMuted }]}>{scheduleTime}</Text>
-              </View>
-            ) : null}
-            {overdueDays > 0 && !isCompleted && (
-              <View style={[styles.todayBadge, { backgroundColor: colors.coral + '22' }]}>
-                <Text style={[styles.todayBadgeText, { color: colors.coral }]}>{overdueDays} days overdue</Text>
-              </View>
+            {isCompleted ? (
+              <CheckCircle2 color={colors.mint} size={22} />
+            ) : (
+              <Circle color={overdueDays > 0 ? colors.coral : colors.textMuted} size={22} />
             )}
-            <Text style={[styles.xpText, { color: colors.accent }]}>+{effectiveXp * categories.length} XP</Text>
-            {categories.map(cat => (
-              <View key={cat} style={[styles.todayBadge, { backgroundColor: (CATEGORY_COLORS[cat] || colors.accent) + '18' }]}>
-                <Text style={[styles.todayBadgeText, { color: CATEGORY_COLORS[cat] || colors.accent }]}>{cat}</Text>
-              </View>
-            ))}
+          </TouchableOpacity>
+          <View style={styles.todayInfo}>
+            <Text
+              style={[
+                styles.todayTitle,
+                { color: colors.textPrimary },
+                isCompleted && { textDecorationLine: 'line-through', color: colors.textSecondary },
+                overdueDays > 0 && !isCompleted && { color: colors.coral }
+              ]}
+              numberOfLines={2}
+            >
+              {item.title}
+            </Text>
+            <View style={styles.todayMeta}>
+              {scheduleTime ? (
+                <View style={styles.todayMetaItem}>
+                  <CalendarDays color={colors.textMuted} size={11} />
+                  <Text style={[styles.todayMetaText, { color: colors.textMuted }]}>{scheduleTime}</Text>
+                </View>
+              ) : null}
+              {overdueDays > 0 && !isCompleted && (
+                <View style={[styles.todayBadge, { backgroundColor: colors.coral + '22' }]}>
+                  <Text style={[styles.todayBadgeText, { color: colors.coral }]}>{overdueDays} days overdue</Text>
+                </View>
+              )}
+              <Text style={[styles.xpText, { color: colors.accent }]}>+{effectiveXp * categories.length} XP</Text>
+              {categories.map(cat => (
+                <View key={cat} style={[styles.todayBadge, { backgroundColor: (CATEGORY_COLORS[cat] || colors.accent) + '18' }]}>
+                  <Text style={[styles.todayBadgeText, { color: CATEGORY_COLORS[cat] || colors.accent }]}>{cat}</Text>
+                </View>
+              ))}
+            </View>
           </View>
         </View>
-        {isCompleted ? (
-          <CheckCircle2 color={colors.mint} size={20} />
-        ) : (
-          <Circle color={colors.textMuted} size={20} />
+
+        {!item.parent_id && allActiveTasks.some(t => t.parent_id === item.id) && (
+          <TouchableOpacity 
+            onPress={() => toggleExpand(item.id)} 
+            style={{ flexDirection: 'row', alignItems: 'center', marginLeft: Spacing.md, marginBottom: Spacing.sm }}
+          >
+            <Text style={{ color: colors.textSecondary, fontSize: 12, marginRight: 4 }}>
+              {expandedTasks.includes(item.id) ? 'Hide subtasks' : 'Show subtasks'}
+            </Text>
+          </TouchableOpacity>
         )}
-      </View>
+      </Animated.View>
     );
   };
 
+  const displayedTodayTasks = todayTasks.reduce((acc: Task[], parent) => {
+    acc.push(parent);
+    if (expandedTasks.includes(parent.id)) {
+      const subtasks = allActiveTasks.filter(t => t.parent_id === parent.id);
+      acc.push(...subtasks);
+    }
+    return acc;
+  }, []);
+
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.bg }]}>
-      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+    <View style={{ flex: 1, backgroundColor: colors.bg, paddingTop: Math.max(insets.top, 24) + 16 }}>
+      {/* Decorative Header Background */}
+      <View style={{
+        position: 'absolute',
+        top: 0, left: 0, right: 0,
+        height: Math.max(insets.top, 24) + 120,
+        backgroundColor: colors.purpleSoft,
+        borderBottomLeftRadius: Radius.xl,
+        borderBottomRightRadius: Radius.xl,
+      }} />
+      <View style={styles.container}>
+        <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         {/* Date Header */}
         <View style={styles.dateHeader}>
           <View>
@@ -340,8 +421,8 @@ export default function ScheduleScreen() {
             </Text>
           </View>
 
-          {todayTasks.length > 0 ? (
-            todayTasks.map(task => (
+          {displayedTodayTasks.length > 0 ? (
+            displayedTodayTasks.map(task => (
               <View key={task.id}>{renderTodayTask({ item: task })}</View>
             ))
           ) : (
@@ -353,28 +434,29 @@ export default function ScheduleScreen() {
             </View>
           )}
         </View>
-      </ScrollView>
-    </SafeAreaView>
+        </ScrollView>
+      </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, paddingHorizontal: Spacing.lg, paddingTop: Spacing.lg },
-  scroll: { paddingBottom: 120 },
+  container: { flex: 1, paddingHorizontal: Spacing.lg },
+  scroll: { paddingBottom: 100 },
 
   // Date Header
   dateHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: Spacing.xl,
+    marginBottom: Spacing.lg,
   },
-  dateDay: { ...Typography.displayLarge, fontSize: 48, lineHeight: 52 },
+  dateDay: { ...Typography.displayLarge, fontSize: 40, lineHeight: 44 },
   dateWeekday: { ...Typography.titleMedium },
-  dateMonthYear: { ...Typography.body, marginTop: 8 },
+  dateMonthYear: { ...Typography.body, marginTop: 4 },
 
   // Section
-  section: { marginBottom: Spacing.xl },
+  section: { marginBottom: Spacing.lg },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -383,8 +465,8 @@ const styles = StyleSheet.create({
   },
   sectionTitle: { ...Typography.titleLarge },
   weekBadge: {
-    paddingHorizontal: 14,
-    paddingVertical: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
     borderRadius: Radius.full,
   },
   weekBadgeText: { ...Typography.caption, fontWeight: '600' },
@@ -401,20 +483,20 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   ganttBody: {
-    minHeight: 60,
-    marginBottom: Spacing.md,
-    gap: 8,
+    minHeight: 48,
+    marginBottom: Spacing.sm,
+    gap: 6,
   },
   ganttRow: {
-    height: 32,
+    height: 28,
     position: 'relative',
   },
   ganttBar: {
     position: 'absolute',
     top: 0,
     height: '100%',
-    borderRadius: 10,
-    paddingHorizontal: 10,
+    borderRadius: 8,
+    paddingHorizontal: 8,
     justifyContent: 'center',
   },
   ganttBarText: {
@@ -423,7 +505,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   ganttEmpty: {
-    paddingVertical: Spacing.xl,
+    paddingVertical: Spacing.lg,
     alignItems: 'center',
   },
   ganttEmptyText: { ...Typography.body, textAlign: 'center' },
@@ -431,12 +513,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     borderTopWidth: 1,
     borderTopColor: 'rgba(0,0,0,0.05)',
-    paddingTop: Spacing.sm,
+    paddingTop: Spacing.xs,
   },
   ganttDayCell: {
     flex: 1,
     alignItems: 'center',
-    paddingVertical: 4,
+    paddingVertical: 3,
   },
   ganttDayText: {
     ...Typography.caption,
@@ -449,19 +531,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: Spacing.md,
     borderRadius: Radius.lg,
-    marginBottom: Spacing.xl,
+    marginBottom: Spacing.lg,
   },
   bannerTitle: { ...Typography.titleMedium, marginBottom: 2 },
   bannerSub: { ...Typography.bodySmall },
   bannerArrow: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
     alignItems: 'center',
     justifyContent: 'center',
   },
 
-  // Today Tasks
   todayCard: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -469,30 +550,26 @@ const styles = StyleSheet.create({
     borderRadius: Radius.lg,
     marginBottom: Spacing.sm,
   },
-  todayIconWrap: {
-    width: 40,
-    height: 40,
-    borderRadius: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 14,
+  checkCol: {
+    marginRight: 10,
+    paddingTop: 2,
   },
   todayInfo: { flex: 1 },
-  todayTitle: { ...Typography.body, marginBottom: 4 },
+  todayTitle: { ...Typography.body, marginBottom: 3 },
   todayMeta: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 6,
     flexWrap: 'wrap',
   },
   todayMetaItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    gap: 3,
   },
   todayMetaText: { ...Typography.caption },
   todayBadge: {
-    paddingHorizontal: 8,
+    paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: Radius.full,
   },
@@ -500,10 +577,10 @@ const styles = StyleSheet.create({
 
   // Empty
   emptyState: {
-    padding: Spacing.xxl,
+    padding: Spacing.xl,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 12,
+    gap: 8,
     borderRadius: Radius.lg,
   },
   emptyText: { ...Typography.body, textAlign: 'center' },
