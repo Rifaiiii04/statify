@@ -25,7 +25,6 @@ export function InputField({
   onBlur,
   ...props
 }: InputFieldProps) {
-  const [focused, setFocused] = useState(false);
   const { colors } = useThemeContext();
 
   return (
@@ -33,9 +32,9 @@ export function InputField({
       {label && <Text style={[styles.label, { color: colors.textSecondary }]}>{label}</Text>}
       <View style={[
         styles.inputContainer,
-        ClayShadow.soft, focused && { shadowColor: colors.accent },
-        error ? { shadowColor: colors.coral } : null]}>
-        {Icon && <Icon color={focused ? colors.accent : colors.textSecondary} size={18} style={styles.leftIcon} />}
+        ClayShadow.soft,
+        error ? { borderColor: colors.coral } : null]}>
+        {Icon && <Icon color={colors.textSecondary} size={18} style={styles.leftIcon} />}
         <TextInput
           style={[
             styles.input, 
@@ -45,8 +44,8 @@ export function InputField({
           ]}
           placeholderTextColor={colors.textMuted}
           selectionColor={colors.accent}
-          onFocus={(e) => { setFocused(true); onFocus?.(e); }}
-          onBlur={(e) => { setFocused(false); onBlur?.(e); }}
+          onFocus={onFocus}
+          onBlur={onBlur}
           {...props}
         />
         {RightIcon && (

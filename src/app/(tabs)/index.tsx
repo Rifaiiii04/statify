@@ -24,7 +24,7 @@ import {
   archiveTask,
   unarchiveTask
 } from '@/db/repositories/task-repository';
-import { addXp, removeXp, logActivity, removeActivity } from '@/db/repositories/stats-repository';
+import { addXp, removeXp, logActivity, removeActivity, getUserStats } from '@/db/repositories/stats-repository';
 import { BottomSheet } from '@/components/ui/BottomSheet';
 import { InputField } from '@/components/ui/InputField';
 import { Button } from '@/components/ui/Button';
@@ -64,6 +64,7 @@ export default function TasksScreen() {
   const [expandedTasks, setExpandedTasks] = useState<number[]>([]);
   const [newStartDate, setNewStartDate] = useState<string | null>(null);
   const [newDeadline, setNewDeadline] = useState<string | null>(null);
+  const [username, setUsername] = useState('');
 
   // Archive Modal State
   const [archiveModalVisible, setArchiveModalVisible] = useState(false);
@@ -82,6 +83,10 @@ export default function TasksScreen() {
   const loadTasks = useCallback(async () => {
     const result = await getAllTasks();
     setTasks(result);
+    try {
+      const stats = await getUserStats();
+      setUsername(stats.username || 'User');
+    } catch(e) {}
   }, []);
 
   useFocusEffect(
@@ -234,6 +239,7 @@ export default function TasksScreen() {
     <View>
       <View style={styles.header}>
         <View>
+          {username ? <Text style={{ ...Typography.bodySmall, color: colors.textSecondary, marginBottom: 4 }}>Hi, {username} 👋</Text> : null}
           <Text style={[styles.greeting, { color: colors.textPrimary }]}>Tasks</Text>
           <Text style={[styles.subGreeting, { color: colors.textSecondary }]}>
             {doneCount}/{totalCount} completed

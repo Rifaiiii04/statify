@@ -99,7 +99,10 @@ export default function StatisticsScreen() {
     <View style={[styles.container, { backgroundColor: colors.bg, paddingTop: Math.max(insets.top, 24) + 16 }]}>
 
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-        <Text style={[styles.pageTitle, { color: colors.textPrimary }]}>Statistics</Text>
+        <View>
+          {stats?.username ? <Text style={{ ...Typography.bodySmall, color: colors.textSecondary, marginBottom: 4 }}>Hi, {stats.username} 👋</Text> : null}
+          <Text style={[styles.pageTitle, { color: colors.textPrimary }]}>Statistics</Text>
+        </View>
 
         <View style={[styles.levelCard, ClayShadow.card]}>
           <View style={styles.levelLeft}>

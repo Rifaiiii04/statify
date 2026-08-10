@@ -19,6 +19,11 @@ export async function getUserStats(): Promise<UserStats> {
   return stats;
 }
 
+export async function completeOnboarding(username: string): Promise<void> {
+  const db = await getDatabase();
+  await db.runAsync('UPDATE user_stats SET username = ?, has_onboarded = 1 WHERE id = 1', username);
+}
+
 function calculateLevel(totalXp: number): number {
   let level = 1;
   let xpNeeded = 100;

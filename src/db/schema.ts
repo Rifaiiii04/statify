@@ -50,7 +50,9 @@ export const CREATE_USER_STATS_TABLE = `
     creativity_xp INTEGER NOT NULL DEFAULT 0,
     discipline_xp INTEGER NOT NULL DEFAULT 0,
     social_xp INTEGER NOT NULL DEFAULT 0,
-    productivity_xp INTEGER NOT NULL DEFAULT 0
+    productivity_xp INTEGER NOT NULL DEFAULT 0,
+    username TEXT DEFAULT '',
+    has_onboarded INTEGER DEFAULT 0
   );
 `;
 
@@ -154,6 +156,8 @@ export interface UserStats {
   discipline_xp: number;
   social_xp: number;
   productivity_xp: number;
+  username: string;
+  has_onboarded: number;
 }
 
 export interface ActivityLog {

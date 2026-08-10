@@ -13,7 +13,7 @@ import { Spacing, Typography, Radius, CATEGORY_COLORS, ClayShadow, GanttColors }
 import { useThemeContext } from '@/context/theme-context';
 import { Task, StatCategory } from '@/db/schema';
 import { getScheduledTasks, getActiveTasks, toggleTask } from '@/db/repositories/task-repository';
-import { addXp, removeXp, logActivity, removeActivity } from '@/db/repositories/stats-repository';
+import { addXp, removeXp, logActivity, removeActivity, getUserStats } from '@/db/repositories/stats-repository';
 
 const CATEGORY_ICON_MAP: Record<string, React.ComponentType<any>> = {
   Physical: Dumbbell,
@@ -89,6 +89,7 @@ export default function ScheduleScreen() {
   const [todayTasks, setTodayTasks] = useState<Task[]>([]);
   const [allActiveTasks, setAllActiveTasks] = useState<Task[]>([]);
   const [expandedTasks, setExpandedTasks] = useState<number[]>([]);
+  const [username, setUsername] = useState('');
 
   const loadData = useCallback(async () => {
     // Gantt chart tasks
@@ -123,8 +124,12 @@ export default function ScheduleScreen() {
       return false;
     });
     
-    setAllActiveTasks(activeTasks);
     setTodayTasks(tTasks);
+
+    try {
+      const stats = await getUserStats();
+      setUsername(stats.username || 'User');
+    } catch(e) {}
   }, [today]);
 
   useFocusEffect(
@@ -330,6 +335,7 @@ export default function ScheduleScreen() {
         {/* Date Header */}
         <View style={styles.dateHeader}>
           <View>
+            {username ? <Text style={{ ...Typography.bodySmall, color: colors.textSecondary, marginBottom: 4 }}>Hi, {username} 👋</Text> : null}
             <Text style={[styles.dateDay, { color: colors.textPrimary }]}>{headerInfo.day}</Text>
             <Text style={[styles.dateWeekday, { color: colors.accent }]}>{headerInfo.weekday}</Text>
           </View>

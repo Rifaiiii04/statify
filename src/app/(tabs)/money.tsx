@@ -11,6 +11,7 @@ import {
   getTransactions, getTodayExpenses, getDailyLimit, setDailyLimit, addTransaction
 } from '@/db/repositories/finance-repository';
 import { BottomSheet } from '@/components/ui/BottomSheet';
+import { getUserStats } from '@/db/repositories/stats-repository';
 import { InputField } from '@/components/ui/InputField';
 import { Button } from '@/components/ui/Button';
 import { useFocusEffect } from 'expo-router';
@@ -26,6 +27,7 @@ export default function MoneyScreen() {
   const [transactionType, setTransactionType] = useState<'income' | 'expense'>('expense');
   const [amountInput, setAmountInput] = useState('');
   const [noteInput, setNoteInput] = useState('');
+  const [username, setUsername] = useState('');
   
   const [showLimitSheet, setShowLimitSheet] = useState(false);
   const [limitInput, setLimitInput] = useState('');
@@ -38,6 +40,11 @@ export default function MoneyScreen() {
     setTransactions(tx);
     setTodayExpenses(expenses);
     setDailyLimitValue(limit);
+
+    try {
+      const stats = await getUserStats();
+      setUsername(stats.username || 'User');
+    } catch(e) {}
   }, []);
 
   useFocusEffect(
@@ -77,7 +84,10 @@ export default function MoneyScreen() {
   const renderHeader = () => (
     <View style={styles.headerContainer}>
       <View style={styles.headerRow}>
-        <Text style={[styles.pageTitle, { color: colors.textPrimary }]}>Wallet</Text>
+        <View>
+          {username ? <Text style={{ ...Typography.bodySmall, color: colors.textSecondary, marginBottom: 4 }}>Hi, {username} 👋</Text> : null}
+          <Text style={[styles.pageTitle, { color: colors.textPrimary }]}>Wallet</Text>
+        </View>
         <TouchableOpacity
           style={[ClayShadow.soft, { backgroundColor: colors.surface, borderRadius: Radius.sm, padding: 10 }]}
           onPress={() => { setLimitInput(dailyLimit.toString()); setShowLimitSheet(true); }}

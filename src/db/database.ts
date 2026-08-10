@@ -70,6 +70,11 @@ async function initDatabase(db: SQLite.SQLiteDatabase): Promise<void> {
   try {
     await db.execAsync("ALTER TABLE tasks ADD COLUMN start_date TEXT DEFAULT NULL");
   } catch (e) {}
+
+  try {
+    await db.execAsync("ALTER TABLE user_stats ADD COLUMN username TEXT DEFAULT ''");
+    await db.execAsync("ALTER TABLE user_stats ADD COLUMN has_onboarded INTEGER DEFAULT 0");
+  } catch (e) {}
 }
 
 export async function resetDatabase(): Promise<void> {

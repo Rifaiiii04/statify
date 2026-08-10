@@ -13,6 +13,8 @@ interface ButtonProps {
   size?: 'sm' | 'md' | 'lg';
   disabled?: boolean;
   style?: ViewStyle | ViewStyle[];
+  textStyle?: object;
+  rightIcon?: LucideIcon;
 }
 
 export function Button({
@@ -24,6 +26,8 @@ export function Button({
   size = 'md',
   disabled,
   style,
+  textStyle,
+  rightIcon: RightIcon,
 }: ButtonProps) {
   const { colors } = useThemeContext();
   const isDisabled = disabled || loading;
@@ -64,7 +68,8 @@ export function Button({
       ) : (
         <>
           {Icon && <Icon color={iconColor} size={size === 'sm' ? 16 : 18} style={styles.icon} />}
-          {title ? <Text style={[styles.text, { color: textColors[variant] }]}>{title}</Text> : null}
+          {title ? <Text style={[styles.text, { color: textColors[variant] }, textStyle]}>{title}</Text> : null}
+          {RightIcon && <RightIcon color={iconColor} size={size === 'sm' ? 16 : 18} style={styles.rightIcon} />}
         </>
       )}
     </TouchableOpacity>
@@ -78,6 +83,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   icon: { marginRight: 8 },
+  rightIcon: { marginLeft: 8 },
   text: { ...Typography.label },
   disabled: { opacity: 0.45 },
 });

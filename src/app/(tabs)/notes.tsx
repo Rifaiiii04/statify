@@ -13,7 +13,7 @@ import { Spacing, Typography, Radius, CATEGORY_COLORS, ClayShadow } from '@/cons
 import { useThemeContext } from '@/context/theme-context';
 import { Note, StatCategory } from '@/db/schema';
 import { getAllNotes, getActiveNotes, getExecutedNotes, createNote, executeNote, unexecuteNote, deleteNote } from '@/db/repositories/note-repository';
-import { addXp, removeXp, logActivity, removeActivity } from '@/db/repositories/stats-repository';
+import { addXp, removeXp, logActivity, removeActivity, getUserStats } from '@/db/repositories/stats-repository';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { BottomSheet } from '@/components/ui/BottomSheet';
 import { InputField } from '@/components/ui/InputField';
@@ -41,10 +41,15 @@ export default function NotesScreen() {
   const [selectedNote, setSelectedNote] = useState<Note | null>(null);
   const [newTitle, setNewTitle] = useState('');
   const [newContent, setNewContent] = useState('');
+  const [username, setUsername] = useState('');
 
   const loadNotes = useCallback(async () => {
     const result = await getAllNotes();
     setNotes(result);
+    try {
+      const stats = await getUserStats();
+      setUsername(stats.username || 'User');
+    } catch(e) {}
   }, []);
 
   useEffect(() => {
@@ -129,6 +134,7 @@ export default function NotesScreen() {
             <ChevronLeft color={colors.textPrimary} size={24} />
           </TouchableOpacity>
           <View>
+            {username ? <Text style={{ ...Typography.bodySmall, color: colors.textSecondary, marginBottom: 4 }}>Hi, {username} 👋</Text> : null}
             <Text style={[styles.greeting, { color: colors.textPrimary }]}>Notes</Text>
             <Text style={[styles.subGreeting, { color: colors.textSecondary }]}>
               Capture ideas, execute them, earn XP

@@ -25,7 +25,7 @@ export default function SettingsScreen() {
     try {
       await resetDatabase();
       setShowResetSheet(false);
-      Alert.alert('Done', 'All data has been reset.');
+      router.replace('/onboarding');
     } catch (error: any) {
       Alert.alert('Error', error.message || 'Unknown error');
     }
@@ -80,7 +80,7 @@ export default function SettingsScreen() {
           <View style={[styles.row, ClayShadow.soft]}>
             <Info color={colors.purple} size={20} />
             <View style={styles.rowContent}>
-              <Text style={[styles.rowTitle, { color: colors.textPrimary }]}>Task Tracker</Text>
+              <Text style={[styles.rowTitle, { color: colors.textPrimary }]}>Statify</Text>
               <Text style={[styles.rowSub, { color: colors.textSecondary }]}>
                 Version 1.0.0 (SQLite Prototype)
               </Text>

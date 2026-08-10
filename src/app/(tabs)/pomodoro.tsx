@@ -7,7 +7,7 @@ import { Play, Pause, RotateCcw, CheckCircle, SkipForward } from 'lucide-react-n
 import { Spacing, Typography, Radius, ClayShadow } from '@/constants/design';
 import { useThemeContext } from '@/context/theme-context';
 import { createSession, getTodaySessionCount } from '@/db/repositories/pomodoro-repository';
-import { addXp, logActivity } from '@/db/repositories/stats-repository';
+import { addXp, logActivity, getUserStats } from '@/db/repositories/stats-repository';
 
 const WORK_DURATION = 25 * 60;
 const BREAK_DURATION = 5 * 60;
@@ -21,6 +21,7 @@ export default function PomodoroScreen() {
   const [timeLeft, setTimeLeft] = useState(WORK_DURATION);
   const [isActive, setIsActive] = useState(false);
   const [sessionCount, setSessionCount] = useState(0);
+  const [username, setUsername] = useState('');
   const intervalRef = useRef<any>(null);
   const progress = useRef(new Animated.Value(0)).current;
 
@@ -28,6 +29,7 @@ export default function PomodoroScreen() {
 
   useEffect(() => {
     getTodaySessionCount().then(setSessionCount);
+    getUserStats().then(s => setUsername(s.username || 'User')).catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -101,7 +103,10 @@ export default function PomodoroScreen() {
 
       <View style={styles.inner}>
         <View style={styles.header}>
-          <Text style={[styles.title, { color: colors.textPrimary }]}>Focus</Text>
+          <View>
+            {username ? <Text style={{ ...Typography.bodySmall, color: colors.textSecondary, marginBottom: 4 }}>Hi, {username} 👋</Text> : null}
+            <Text style={[styles.title, { color: colors.textPrimary }]}>Focus</Text>
+          </View>
           <View style={styles.phaseBadge}>
             <View style={[styles.phaseDot, { backgroundColor: phase === 'work' ? colors.coral : colors.mint }]} />
             <Text style={[styles.phaseLabel, { color: colors.textSecondary }]}>
