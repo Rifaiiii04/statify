@@ -69,10 +69,10 @@ function getOverdueDays(task: Task, todayStr: string): number {
   if (task.recurrence !== 'once') return 0;
   if (task.start_date || task.deadline) return 0;
   if (task.status !== 'active') return 0;
-  
+
   const createdDate = task.created_at.split('T')[0];
   if (createdDate >= todayStr) return 0;
-  
+
   const t = new Date(todayStr);
   const c = new Date(createdDate);
   const diffTime = Math.abs(t.getTime() - c.getTime());
@@ -96,7 +96,7 @@ export default function ScheduleScreen() {
     // Gantt chart tasks
     const allDeadlineTasks = await getScheduledTasks();
     setWeekTasks(allDeadlineTasks);
-    
+
     // Today Plans logic
     const activeTasks = await getActiveTasks();
     const todayDateObj = new Date(today);
@@ -106,13 +106,13 @@ export default function ScheduleScreen() {
       if (t.parent_id) return false;
       return getTaskActiveStatus(t, today).isActive;
     });
-    
+
     setTodayTasks(tTasks);
 
     try {
       const stats = await getUserStats();
       setUsername(stats.username || 'User');
-    } catch(e) {}
+    } catch (e) { }
   }, [today]);
 
   useFocusEffect(
@@ -136,7 +136,7 @@ export default function ScheduleScreen() {
     const taskColor = getTaskColor(task);
     const startStr = (task.start_date || task.created_at).split('T')[0];
     const endStr = (task.deadline || startStr).split('T')[0];
-    
+
     // Find column indexes
     let startIndex = weekDates.findIndex(wd => wd.date === startStr);
     let endIndex = weekDates.findIndex(wd => wd.date === endStr);
@@ -145,7 +145,7 @@ export default function ScheduleScreen() {
     if (startIndex === -1 && startStr < weekStart) startIndex = 0;
     // If ends after this week, clamp to end of week
     if (endIndex === -1 && endStr > weekEnd) endIndex = 6;
-    
+
     if (startIndex === -1 || endIndex === -1) return null;
 
     const barStart = startIndex;
@@ -189,7 +189,7 @@ export default function ScheduleScreen() {
       if (!item.start_date && !item.deadline) return '';
       const formatDt = (dStr: string) => {
         const d = new Date(dStr);
-        return `${d.getDate()} ${['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()]}`;
+        return `${d.getDate()} ${['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][d.getMonth()]}`;
       };
       if (item.start_date && item.deadline) return `${formatDt(item.start_date)} - ${formatDt(item.deadline)}`;
       if (item.deadline) return `Due ${formatDt(item.deadline)}`;
@@ -198,7 +198,7 @@ export default function ScheduleScreen() {
     })();
 
     const toggleExpand = (id: number) => {
-      setExpandedTasks(prev => 
+      setExpandedTasks(prev =>
         prev.includes(id) ? prev.filter(taskId => taskId !== id) : [...prev, id]
       );
     };
@@ -234,19 +234,19 @@ export default function ScheduleScreen() {
     };
 
     return (
-      <Animated.View 
-        entering={FadeIn} 
-        exiting={FadeOut} 
+      <Animated.View
+        entering={FadeIn}
+        exiting={FadeOut}
         layout={LinearTransition.springify()}
       >
         <View style={[
-          styles.todayCard, 
-          ClayShadow.card, 
+          styles.todayCard,
+          ClayShadow.card,
           item.parent_id ? { marginLeft: 32, padding: 12 } : {},
-          isCompleted && { opacity: 0.5 }, 
+          isCompleted && { opacity: 0.5 },
           overdueDays > 0 && !isCompleted && { backgroundColor: colors.coralSoft }
         ]}>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.checkCol}
             onPress={handleToggle}
             disabled={isCompleted || item.status === 'done'}
@@ -293,8 +293,8 @@ export default function ScheduleScreen() {
         </View>
 
         {!item.parent_id && allActiveTasks.some(t => t.parent_id === item.id) && (
-          <TouchableOpacity 
-            onPress={() => toggleExpand(item.id)} 
+          <TouchableOpacity
+            onPress={() => toggleExpand(item.id)}
             style={{ flexDirection: 'row', alignItems: 'center', marginLeft: Spacing.md, marginBottom: Spacing.sm }}
           >
             <Text style={{ color: colors.textSecondary, fontSize: 12, marginRight: 4 }}>
@@ -320,108 +320,108 @@ export default function ScheduleScreen() {
 
       <View style={styles.container}>
         <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-        {/* Date Header */}
-        <View style={styles.dateHeader}>
-          <View>
-            {username ? <Text style={{ ...Typography.bodySmall, color: colors.textSecondary, marginBottom: 4 }}>Hi, {username} 👋</Text> : null}
-            <Text style={[styles.dateDay, { color: colors.textPrimary }]}>{headerInfo.day}</Text>
-            <Text style={[styles.dateWeekday, { color: colors.accent }]}>{headerInfo.weekday}</Text>
-          </View>
-          <Text style={[styles.dateMonthYear, { color: colors.textSecondary }]}>
-            {headerInfo.monthYear}
-          </Text>
-        </View>
-
-        {/* Your Plans - Gantt Chart */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Your plans</Text>
-            <View style={[styles.weekBadge, ClayShadow.soft, { backgroundColor: colors.accentSoft }]}>
-              <Text style={[styles.weekBadgeText, { color: colors.accent }]}>This week</Text>
+          {/* Date Header */}
+          <View style={styles.dateHeader}>
+            <View>
+              {username ? <Text style={{ ...Typography.bodySmall, color: colors.textSecondary, marginBottom: 4 }}>Hi, {username} 👋</Text> : null}
+              <Text style={[styles.dateDay, { color: colors.textPrimary }]}>{headerInfo.day}</Text>
+              <Text style={[styles.dateWeekday, { color: colors.accent }]}>{headerInfo.weekday}</Text>
             </View>
-          </View>
-
-          <View style={[styles.ganttContainer, ClayShadow.card]}>
-            {/* Gantt Rows */}
-            {ganttTasks.length > 0 ? (
-              <View style={styles.ganttBody}>
-                {ganttTasks.map(renderGanttRow)}
-              </View>
-            ) : (
-              <View style={styles.ganttEmpty}>
-                <Text style={[styles.ganttEmptyText, { color: colors.textMuted }]}>
-                  No tasks with deadlines this week
-                </Text>
-              </View>
-            )}
-
-            {/* Week Day Labels */}
-            <View style={styles.ganttDayRow}>
-              {weekDates.map(wd => {
-                const isToday = wd.date === today;
-                return (
-                  <View
-                    key={wd.date}
-                    style={[
-                      styles.ganttDayCell,
-                      isToday && { backgroundColor: colors.accent, borderRadius: 4, borderWidth: 1, borderColor: '#000' },
-                    ]}
-                  >
-                    <Text
-                      style={[
-                        styles.ganttDayText,
-                        { color: colors.textMuted },
-                        isToday && { color: colors.white },
-                      ]}
-                    >
-                      {wd.label}
-                    </Text>
-                  </View>
-                );
-              })}
-            </View>
-          </View>
-        </View>
-
-        {/* Motivational Banner */}
-        {todayTasks.length > 0 && todayTasks.every(t => t.completed) && (
-          <View style={[styles.banner, ClayShadow.card, { backgroundColor: colors.mintSoft }]}>
-            <View style={{ flex: 1 }}>
-              <Text style={[styles.bannerTitle, { color: colors.textPrimary }]}>
-                You are doing great!
-              </Text>
-              <Text style={[styles.bannerSub, { color: colors.textSecondary }]}>
-                You have completed all daily plans
-              </Text>
-            </View>
-            <View style={[styles.bannerArrow, { backgroundColor: colors.amber }]}>
-              <ChevronRight color={colors.white} size={20} />
-            </View>
-          </View>
-        )}
-
-        {/* Today Plans */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Today plans</Text>
-            <Text style={[styles.seeAll, { color: colors.accent }]}>
-              {todayTasks.length} tasks
+            <Text style={[styles.dateMonthYear, { color: colors.textSecondary }]}>
+              {headerInfo.monthYear}
             </Text>
           </View>
 
-          {displayedTodayTasks.length > 0 ? (
-            displayedTodayTasks.map(task => (
-              <View key={task.id}>{renderTodayTask({ item: task })}</View>
-            ))
-          ) : (
-            <View style={[styles.emptyState, ClayShadow.soft]}>
-              <CalendarDays color={colors.textMuted} size={36} />
-              <Text style={[styles.emptyText, { color: colors.textMuted }]}>
-                No tasks scheduled for today.{'\n'}Add a deadline to your tasks!
-              </Text>
+          {/* Your Plans - Gantt Chart */}
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Your plans</Text>
+              <View style={[styles.weekBadge, ClayShadow.soft, { backgroundColor: colors.accentSoft }]}>
+                <Text style={[styles.weekBadgeText, { color: colors.accent }]}>This week</Text>
+              </View>
+            </View>
+
+            <View style={[styles.ganttContainer, ClayShadow.card]}>
+              {/* Gantt Rows */}
+              {ganttTasks.length > 0 ? (
+                <View style={styles.ganttBody}>
+                  {ganttTasks.map(renderGanttRow)}
+                </View>
+              ) : (
+                <View style={styles.ganttEmpty}>
+                  <Text style={[styles.ganttEmptyText, { color: colors.textMuted }]}>
+                    No tasks with deadlines this week
+                  </Text>
+                </View>
+              )}
+
+              {/* Week Day Labels */}
+              <View style={styles.ganttDayRow}>
+                {weekDates.map(wd => {
+                  const isToday = wd.date === today;
+                  return (
+                    <View
+                      key={wd.date}
+                      style={[
+                        styles.ganttDayCell,
+                        isToday && { backgroundColor: colors.accent, borderRadius: 4, borderWidth: 1, borderColor: '#000' },
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          styles.ganttDayText,
+                          { color: colors.textMuted },
+                          isToday && { color: colors.white },
+                        ]}
+                      >
+                        {wd.label}
+                      </Text>
+                    </View>
+                  );
+                })}
+              </View>
+            </View>
+          </View>
+
+          {/* Motivational Banner */}
+          {todayTasks.length > 0 && todayTasks.every(t => t.completed) && (
+            <View style={[styles.banner, ClayShadow.card, { backgroundColor: colors.mintSoft }]}>
+              <View style={{ flex: 1 }}>
+                <Text style={[styles.bannerTitle, { color: colors.textPrimary }]}>
+                  You are doing great!
+                </Text>
+                <Text style={[styles.bannerSub, { color: colors.textSecondary }]}>
+                  You have completed all daily plans
+                </Text>
+              </View>
+              <View style={[styles.bannerArrow, { backgroundColor: colors.amber }]}>
+                <ChevronRight color={colors.white} size={20} />
+              </View>
             </View>
           )}
-        </View>
+
+          {/* Today Plans */}
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Today plans</Text>
+              <Text style={[styles.seeAll, { color: colors.accent }]}>
+                {todayTasks.length} tasks
+              </Text>
+            </View>
+
+            {displayedTodayTasks.length > 0 ? (
+              displayedTodayTasks.map(task => (
+                <View key={task.id}>{renderTodayTask({ item: task })}</View>
+              ))
+            ) : (
+              <View style={[styles.emptyState, ClayShadow.soft]}>
+                <CalendarDays color={colors.textMuted} size={36} />
+                <Text style={[styles.emptyText, { color: colors.textMuted }]}>
+                  No tasks scheduled for today.{'\n'}Add a deadline to your tasks!
+                </Text>
+              </View>
+            )}
+          </View>
         </ScrollView>
       </View>
     </View>
@@ -437,7 +437,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: Spacing.lg,
+    marginBottom: Spacing.sm,
   },
   dateDay: { ...Typography.displayLarge, fontSize: 40, lineHeight: 44 },
   dateWeekday: { ...Typography.titleMedium },
