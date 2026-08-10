@@ -8,7 +8,7 @@ import { Spacing, Typography, Radius, ClayShadow } from '@/constants/design';
 import { useThemeContext } from '@/context/theme-context';
 import { FinancialTransaction } from '@/db/schema';
 import {
-  getTransactions, getTodayExpenses, getDailyLimit, setDailyLimit, addTransaction
+  getTransactions, getTodayExpenses, getDailyLimit, setDailyLimit, addTransaction, evaluateDailyBudgetQuest
 } from '@/db/repositories/finance-repository';
 import { BottomSheet } from '@/components/ui/BottomSheet';
 import { getUserStats } from '@/db/repositories/stats-repository';
@@ -33,6 +33,7 @@ export default function MoneyScreen() {
   const [limitInput, setLimitInput] = useState('');
 
   const loadData = useCallback(async () => {
+    await evaluateDailyBudgetQuest();
     const [tx, expenses, limit] = await Promise.all([
       getTransactions(),
       getTodayExpenses(),
@@ -58,6 +59,7 @@ export default function MoneyScreen() {
     if (isNaN(amount) || amount <= 0) return;
     
     await addTransaction(transactionType, amount, 'General', noteInput.trim());
+    await evaluateDailyBudgetQuest();
     setAmountInput('');
     setNoteInput('');
     setShowTransactionSheet(false);
@@ -69,6 +71,7 @@ export default function MoneyScreen() {
     if (isNaN(limit) || limit <= 0) return;
     
     await setDailyLimit(limit);
+    await evaluateDailyBudgetQuest();
     setLimitInput('');
     setShowLimitSheet(false);
     loadData();
@@ -90,7 +93,7 @@ export default function MoneyScreen() {
         </View>
         <TouchableOpacity
           style={[ClayShadow.soft, { backgroundColor: colors.surface, borderRadius: Radius.sm, padding: 10 }]}
-          onPress={() => { setLimitInput(dailyLimit.toString()); setShowLimitSheet(true); }}
+          onPress={() => { setLimitInput(`Rp ${dailyLimit.toLocaleString('id-ID')}`); setShowLimitSheet(true); }}
         >
           <Settings color={colors.textSecondary} size={22} />
         </TouchableOpacity>
@@ -173,7 +176,8 @@ export default function MoneyScreen() {
       setAmountInput('');
       return;
     }
-    setAmountInput(parseInt(numericVal, 10).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.'));
+    const formatted = parseInt(numericVal, 10).toLocaleString('id-ID');
+    setAmountInput(`Rp ${formatted}`);
   };
 
   const handleLimitChange = (text: string) => {
@@ -182,7 +186,8 @@ export default function MoneyScreen() {
       setLimitInput('');
       return;
     }
-    setLimitInput(parseInt(numericVal, 10).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.'));
+    const formatted = parseInt(numericVal, 10).toLocaleString('id-ID');
+    setLimitInput(`Rp ${formatted}`);
   };
 
   return (

@@ -1,6 +1,6 @@
 import { getDatabase } from '../database';
 import { FinancialTransaction, BudgetSettings, Task } from '../schema';
-import { addXp, removeXp, logActivity } from './stats-repository';
+import { addXp, removeXp, logActivity, removeActivity } from './stats-repository';
 
 export async function addTransaction(type: 'income' | 'expense', amount: number, category: string, note: string = '') {
   const db = await getDatabase();
@@ -68,20 +68,19 @@ export async function evaluateDailyBudgetQuest() {
     // Complete the task
     await db.runAsync("UPDATE tasks SET completed = 1, status = ?, completed_at = datetime('now') WHERE id = ?", newStatus, quest.id);
     
-    if (expenses <= limit) {
+    if (isSuccess) {
       // Success
       await addXp(quest.xp, 'Discipline');
       await logActivity('task', quest.xp, 'Discipline');
     } else {
       // Failed (Penalty)
       await removeXp(quest.xp, 'Discipline');
-      // logActivity handles positive XP usually, but we can pass negative
-      await logActivity('task', -quest.xp, 'Discipline');
+      await removeActivity('task', quest.xp, 'Discipline');
     }
   }
   
-  // 2. Create today's quest if it doesn't exist
-  const todayQuest = await db.getFirstAsync<Task>(
+  // 2. Ensure today's quest exists
+  let todayQuest = await db.getFirstAsync<Task>(
     "SELECT * FROM tasks WHERE is_system = 1 AND date(created_at) = ?",
     today
   );
@@ -91,5 +90,36 @@ export async function evaluateDailyBudgetQuest() {
       "INSERT INTO tasks (title, category, recurrence, is_system, xp) VALUES (?, 'Discipline', 'daily', 1, 30)",
       `Keep spending under Rp ${limit.toLocaleString()}`
     );
+    todayQuest = await db.getFirstAsync<Task>(
+      "SELECT * FROM tasks WHERE is_system = 1 AND date(created_at) = ?",
+      today
+    );
+  }
+
+  // 3. Evaluate TODAY's quest immediately
+  if (todayQuest) {
+    const todayExpensesResult = await db.getFirstAsync<{ total: number }>(
+      "SELECT SUM(amount) as total FROM financial_transactions WHERE type = 'expense' AND date(created_at) = ?",
+      today
+    );
+    const todayExpenses = todayExpensesResult?.total || 0;
+
+    if (todayQuest.status === 'active' && todayExpenses > limit) {
+      // Exceeded budget limit -> Mark today's quest as failed immediately & deduct EXP
+      await db.runAsync(
+        "UPDATE tasks SET completed = 1, status = 'failed', completed_at = datetime('now') WHERE id = ?",
+        todayQuest.id
+      );
+      await removeXp(todayQuest.xp, 'Discipline');
+      await removeActivity('task', todayQuest.xp, 'Discipline');
+    } else if (todayQuest.status === 'failed' && todayExpenses <= limit) {
+      // Restored budget limit -> Restore active status and restore EXP
+      await db.runAsync(
+        "UPDATE tasks SET completed = 0, status = 'active', completed_at = NULL WHERE id = ?",
+        todayQuest.id
+      );
+      await addXp(todayQuest.xp, 'Discipline');
+      await logActivity('task', todayQuest.xp, 'Discipline');
+    }
   }
 }
