@@ -10,7 +10,7 @@ import { ClayShadow } from '@/constants/design';
 import { View } from 'react-native';
 import Animated, { useAnimatedStyle, withTiming, withSpring } from 'react-native-reanimated';
 
-const TabIcon = ({ icon: Icon, focused, colors }: any) => {
+const TabIcon = ({ icon: Icon, focused, colors, activeColor, activeIconColor = colors.white, tabColor }: any) => {
   const bgStyle = useAnimatedStyle(() => {
     return {
       opacity: withTiming(focused ? 1 : 0, { duration: 200 }),
@@ -23,6 +23,9 @@ const TabIcon = ({ icon: Icon, focused, colors }: any) => {
       transform: [{ scale: withSpring(focused ? 1.1 : 1, { damping: 15 }) }],
     };
   }, [focused]);
+
+  const colorToUse = activeColor || colors.accent;
+  const iconColorToUse = focused ? activeIconColor : (tabColor || colors.textMuted);
 
   return (
     <View
@@ -37,27 +40,27 @@ const TabIcon = ({ icon: Icon, focused, colors }: any) => {
     >
       <Animated.View
         style={[
+          ClayShadow.button,
           {
             position: 'absolute',
             width: '100%',
             height: '100%',
             borderRadius: 4,
-            backgroundColor: colors.accent,
+            backgroundColor: colorToUse,
             borderWidth: 2,
             borderColor: '#000000',
           },
           bgStyle,
-          ClayShadow.button,
         ]}
       />
       <Animated.View style={[{ zIndex: 1 }, iconStyle]}>
-        <Icon color={focused ? colors.white : colors.textMuted} size={20} />
+        <Icon color={iconColorToUse} size={20} />
       </Animated.View>
     </View>
   );
 };
 
-const FloatingTabIcon = ({ icon: Icon, focused, colors }: any) => {
+const FloatingTabIcon = ({ icon: Icon, focused, colors, activeColor = colors.coral, activeIconColor = colors.white, tabColor = colors.coral }: any) => {
   const containerStyle = useAnimatedStyle(() => {
     return {
       transform: [
@@ -66,6 +69,9 @@ const FloatingTabIcon = ({ icon: Icon, focused, colors }: any) => {
       ],
     };
   }, [focused]);
+
+  const bgColor = focused ? activeColor : colors.surface;
+  const iconColorToUse = focused ? activeIconColor : tabColor;
 
   return (
     <Animated.View
@@ -76,7 +82,7 @@ const FloatingTabIcon = ({ icon: Icon, focused, colors }: any) => {
           borderRadius: 8,
           position: 'relative',
           top: -10,
-          backgroundColor: colors.accent,
+          backgroundColor: bgColor,
           alignItems: 'center',
           justifyContent: 'center',
           borderWidth: 2,
@@ -87,7 +93,7 @@ const FloatingTabIcon = ({ icon: Icon, focused, colors }: any) => {
         containerStyle
       ]}
     >
-      <Icon color={colors.white} size={22} />
+      <Icon color={iconColorToUse} size={22} />
     </Animated.View>
   );
 };
@@ -131,35 +137,80 @@ export default function TabsLayout() {
         name="index"
         options={{
           title: 'Tasks',
-          tabBarIcon: ({ focused }) => <TabIcon icon={LayoutDashboard} focused={focused} colors={colors} />,
+          tabBarIcon: ({ focused }) => (
+            <TabIcon 
+              icon={LayoutDashboard} 
+              focused={focused} 
+              colors={colors} 
+              activeColor={colors.accent}
+              activeIconColor={colors.white}
+              tabColor={colors.accent}
+            />
+          ),
         }}
       />
       <Tabs.Screen
         name="schedule"
         options={{
           title: 'Schedule',
-          tabBarIcon: ({ focused }) => <TabIcon icon={CalendarDays} focused={focused} colors={colors} />,
+          tabBarIcon: ({ focused }) => (
+            <TabIcon 
+              icon={CalendarDays} 
+              focused={focused} 
+              colors={colors} 
+              activeColor={colors.mint}
+              activeIconColor={colors.black}
+              tabColor={colors.mint}
+            />
+          ),
         }}
       />
       <Tabs.Screen
         name="pomodoro"
         options={{
           title: 'Focus',
-          tabBarIcon: ({ focused }) => <FloatingTabIcon icon={Timer} focused={focused} colors={colors} />,
+          tabBarIcon: ({ focused }) => (
+            <FloatingTabIcon 
+              icon={Timer} 
+              focused={focused} 
+              colors={colors} 
+              activeColor={colors.coral}
+              activeIconColor={colors.white}
+              tabColor={colors.coral}
+            />
+          ),
         }}
       />
       <Tabs.Screen
         name="money"
         options={{
           title: 'Money',
-          tabBarIcon: ({ focused }) => <TabIcon icon={Wallet} focused={focused} colors={colors} />,
+          tabBarIcon: ({ focused }) => (
+            <TabIcon 
+              icon={Wallet} 
+              focused={focused} 
+              colors={colors} 
+              activeColor={colors.amber}
+              activeIconColor={colors.black}
+              tabColor={colors.amber}
+            />
+          ),
         }}
       />
       <Tabs.Screen
         name="statistics"
         options={{
           title: 'Stats',
-          tabBarIcon: ({ focused }) => <TabIcon icon={BarChart2} focused={focused} colors={colors} />,
+          tabBarIcon: ({ focused }) => (
+            <TabIcon 
+              icon={BarChart2} 
+              focused={focused} 
+              colors={colors} 
+              activeColor={colors.purple}
+              activeIconColor={colors.white}
+              tabColor={colors.purple}
+            />
+          ),
         }}
       />
       <Tabs.Screen
