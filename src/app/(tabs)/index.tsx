@@ -1,6 +1,6 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
-  View, Text, StyleSheet,
+  View, Text, StyleSheet, ScrollView,
   FlatList, TouchableOpacity, Alert, Platform, Animated as RNAnimated,
 } from 'react-native';
 import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
@@ -31,6 +31,7 @@ import { Button } from '@/components/ui/Button';
 import { CategoryPicker } from '@/components/ui/CategoryPicker';
 import { RecurrencePicker } from '@/components/ui/RecurrencePicker';
 import { DatePicker } from '@/components/ui/DatePicker';
+import { getTaskActiveStatus } from '@/utils/task-utils';
 
 const CATEGORY_ICON_MAP: Record<string, React.ComponentType<any>> = {
   Physical: Dumbbell,
@@ -47,7 +48,7 @@ const RECURRENCE_ICON_MAP: Record<string, React.ComponentType<any>> = {
   specific_days: CalendarDays,
 };
 
-type FilterTab = 'active' | 'done' | 'failed' | 'archived';
+type FilterTab = 'active' | 'inactive' | 'done' | 'failed' | 'archived';
 
 export default function TasksScreen() {
   const router = useRouter();
@@ -95,6 +96,35 @@ export default function TasksScreen() {
     }, [loadTasks])
   );
 
+  // Dynamic midnight & periodic refresh check
+  useEffect(() => {
+    const calculateMsUntilMidnight = () => {
+      const now = new Date();
+      const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 1);
+      return midnight.getTime() - now.getTime();
+    };
+
+    let timeoutId: any;
+    const scheduleMidnightRefresh = () => {
+      const ms = calculateMsUntilMidnight();
+      timeoutId = setTimeout(() => {
+        loadTasks();
+        scheduleMidnightRefresh();
+      }, ms);
+    };
+
+    scheduleMidnightRefresh();
+
+    const intervalId = setInterval(() => {
+      loadTasks();
+    }, 60000);
+
+    return () => {
+      clearTimeout(timeoutId);
+      clearInterval(intervalId);
+    };
+  }, [loadTasks]);
+
   const handleCreateTask = async () => {
     if (!newTitle.trim() || newCategories.length === 0) return;
     await createTask(newTitle.trim(), newCategories.join(',') as StatCategory, newRecurrence, newDays, parentTaskId, newStartDate, newDeadline);
@@ -134,6 +164,12 @@ export default function TasksScreen() {
   const handleToggle = async (task: Task) => {
     if (task.is_system) {
       Alert.alert('System Quest', 'This is an automatic daily quest. Edit your budget in the Money tab.');
+      return;
+    }
+
+    const activeStatus = getTaskActiveStatus(task);
+    if (!activeStatus.isActive && !task.completed) {
+      Alert.alert('Task Inactive', activeStatus.reason || 'This task is not active for today.');
       return;
     }
     
@@ -204,7 +240,17 @@ export default function TasksScreen() {
       }]);
   };
 
-  const activeCount = tasks.filter(t => t.status === 'active' && !t.parent_id).length;
+  const isMatchingFilter = (t: Task) => {
+    if (filter === 'done') return t.status === 'done';
+    if (filter === 'failed') return t.status === 'failed';
+    if (filter === 'archived') return t.status === 'archived';
+    if (t.status !== 'active') return false;
+    const activeStatus = getTaskActiveStatus(t);
+    return filter === 'active' ? activeStatus.isActive : !activeStatus.isActive;
+  };
+
+  const activeCount = tasks.filter(t => !t.parent_id && t.status === 'active' && getTaskActiveStatus(t).isActive).length;
+  const inactiveCount = tasks.filter(t => !t.parent_id && t.status === 'active' && !getTaskActiveStatus(t).isActive).length;
   const doneCount = tasks.filter(t => t.status === 'done' && !t.parent_id).length;
   const failedCount = tasks.filter(t => t.status === 'failed' && !t.parent_id).length;
   const archivedCount = tasks.filter(t => t.status === 'archived' && !t.parent_id).length;
@@ -212,17 +258,17 @@ export default function TasksScreen() {
   const progress = totalCount > 0 ? (doneCount / totalCount) * 100 : 0;
   
   const displayedTasks: Task[] = [];
-  const matchingParents = tasks.filter(t => !t.parent_id && t.status === filter);
+  const matchingParents = tasks.filter(t => !t.parent_id && isMatchingFilter(t));
   
   matchingParents.forEach(parent => {
     displayedTasks.push(parent);
     if (expandedTasks.includes(parent.id)) {
-      const children = tasks.filter(t => t.parent_id === parent.id && t.status === filter);
+      const children = tasks.filter(t => t.parent_id === parent.id && isMatchingFilter(t));
       displayedTasks.push(...children);
     }
   });
   
-  const orphanChildren = tasks.filter(t => t.parent_id && t.status === filter && !matchingParents.some(p => p.id === t.parent_id));
+  const orphanChildren = tasks.filter(t => t.parent_id && isMatchingFilter(t) && !matchingParents.some(p => p.id === t.parent_id));
   displayedTasks.push(...orphanChildren);
 
   const toggleExpand = (id: number) => {
@@ -231,6 +277,7 @@ export default function TasksScreen() {
 
   const FILTER_CONFIGS = [
     { key: 'active' as FilterTab, label: 'Active', count: activeCount, color: colors.accent },
+    { key: 'inactive' as FilterTab, label: 'Inactive', count: inactiveCount, color: colors.amber },
     { key: 'done' as FilterTab, label: 'Done', count: doneCount, color: colors.mint },
     { key: 'failed' as FilterTab, label: 'Fail', count: failedCount, color: colors.coral },
     { key: 'archived' as FilterTab, label: 'Archive', count: archivedCount, color: colors.purple }];
@@ -265,7 +312,11 @@ export default function TasksScreen() {
         <View style={[styles.progressBarFill, { width: `${progress}%`, backgroundColor: colors.accent }]} />
       </View>
       
-      <View style={styles.filterRow}>
+      <ScrollView 
+        horizontal 
+        showsHorizontalScrollIndicator={false} 
+        contentContainerStyle={styles.filterRow}
+      >
         {FILTER_CONFIGS.map(({ key, label, count, color }) => (
           <TouchableOpacity
             key={key}
@@ -273,19 +324,21 @@ export default function TasksScreen() {
               styles.filterTab,
               ClayShadow.soft, filter === key && { backgroundColor: color + '18', shadowColor: color }]}
             onPress={() => setFilter(key)}
+            activeOpacity={0.7}
           >
             <Text style={[styles.filterText, { color: filter === key ? color : colors.textSecondary }]}>
               {label} ({count})
             </Text>
           </TouchableOpacity>
         ))}
-      </View>
+      </ScrollView>
 
       {displayedTasks.length === 0 && (
         <View style={[styles.emptyState, ClayShadow.soft]}>
           <LayoutDashboardIcon color={colors.textMuted} size={36} />
           <Text style={[styles.emptyText, { color: colors.textMuted }]}>
-            {filter === 'active' ? 'No active tasks. Tap + to add one.' : 
+            {filter === 'active' ? 'No active tasks today. Tap + to add one.' : 
+             filter === 'inactive' ? 'No inactive or scheduled tasks.' :
              filter === 'done' ? 'No completed tasks yet.' :
              filter === 'failed' ? 'No failed tasks.' : 'No archived tasks.'}
           </Text>
@@ -348,19 +401,22 @@ export default function TasksScreen() {
       );
     };
 
+    const activeStatus = getTaskActiveStatus(item);
+    const isInactive = !activeStatus.isActive && !isCompleted && !isFailed && !isArchived;
+
     return (
       <Animated.View 
         entering={FadeIn} 
         exiting={FadeOut} 
         layout={LinearTransition.springify()}
-        style={{ marginHorizontal: -16, marginBottom: -16 + Spacing.md }}
+        style={{ marginHorizontal: -16, marginBottom: -8 }}
       >
         <Swipeable 
           renderRightActions={renderRightActions} 
           overshootRight={false}
           enabled={!isCompleted && item.status !== 'done' && item.status !== 'archived'}
         >
-          <View style={{ paddingHorizontal: 24, paddingBottom: 24, position: 'relative' }}>
+          <View style={{ paddingHorizontal: 16, paddingBottom: 10, position: 'relative' }}>
             {isSubtask && (
               <>
                 <View style={{
@@ -390,9 +446,9 @@ export default function TasksScreen() {
             <GHTouchableOpacity
               style={[
                 styles.taskCard,
-                item.parent_id ? { marginLeft: 32, padding: 12, borderRadius: Radius.lg } : {},
+                item.parent_id ? { marginLeft: 24, padding: 10, borderRadius: Radius.md } : {},
                 ClayShadow.card,
-                (isCompleted || isFailed || isArchived) && { opacity: 0.6 },
+                (isCompleted || isFailed || isArchived || isInactive) && { opacity: 0.6 },
                 overdueDays > 0 && !isCompleted && { backgroundColor: colors.coralSoft }
               ]}
               onLongPress={() => handleLongPress(item)}
@@ -408,13 +464,13 @@ export default function TasksScreen() {
                     hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                   >
                     {isCompleted ? (
-                      <CheckCircle2 color={colors.mint} size={22} />
+                      <CheckCircle2 color={colors.mint} size={20} />
                     ) : isFailed ? (
-                      <XCircle color={colors.coral} size={22} />
+                      <XCircle color={colors.coral} size={20} />
                     ) : isArchived ? (
-                      <Archive color={colors.purple} size={22} />
+                      <Archive color={colors.purple} size={20} />
                     ) : (
-                      <Circle color={overdueDays > 0 ? colors.coral : colors.textMuted} size={22} />
+                      <Circle color={overdueDays > 0 ? colors.coral : colors.textMuted} size={20} />
                     )}
                   </TouchableOpacity>
                   
@@ -445,29 +501,53 @@ export default function TasksScreen() {
                       <View style={[styles.recurrenceBadge, { backgroundColor: colors.surfaceHigh }]}>
                         <RotateCcw color={colors.textSecondary} size={10} />
                         <Text style={[styles.recurrenceText, { color: colors.textSecondary }]}>
-                          {item.recurrence === 'once' ? 'Once' : item.recurrence === 'daily' ? 'Daily' : 'Weekly'}
+                          {(() => {
+                            if (item.recurrence === 'once') return 'Once';
+                            if (item.recurrence === 'daily') return 'Daily';
+                            if (item.recurrence === 'specific_days' && item.recurrence_days) {
+                              try {
+                                const daysArr: number[] = JSON.parse(item.recurrence_days);
+                                const DAY_NAMES = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+                                if (daysArr.length > 0) {
+                                  return daysArr.map(d => DAY_NAMES[d]).join(', ');
+                                }
+                              } catch (e) {}
+                              return 'Specific Days';
+                            }
+                            return 'Once';
+                          })()}
                         </Text>
                       </View>
-                      
-                      <Text style={[styles.xpText, { color: colors.accent }]}>+{effectiveXp * categories.length} XP</Text>
+
+                      {isInactive && (
+                        <View style={[styles.recurrenceBadge, { backgroundColor: colors.amberSoft }]}>
+                          <Text style={[styles.recurrenceText, { color: colors.textPrimary, fontFamily: 'Poppins_700Bold' }]}>
+                            {activeStatus.reason || 'Inactive'}
+                          </Text>
+                        </View>
+                      )}
                       
                       {(item.start_date || item.deadline) && (
                         <View style={[styles.recurrenceBadge, { backgroundColor: colors.coralSoft }]}>
                           <CalendarDays color={colors.coral} size={10} />
-                          <Text style={[styles.recurrenceText, { color: colors.coral }]}>
+                          <Text style={[styles.recurrenceText, { color: colors.textPrimary, fontFamily: 'Poppins_600SemiBold' }]}>
                             {(() => {
                               const formatDt = (dStr: string) => {
-                                const d = new Date(dStr + 'T00:00:00');
-                                return `${d.getDate()} ${['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()]}`;
+                                const parts = dStr.split('T')[0].split('-');
+                                if (parts.length < 3) return dStr;
+                                const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+                                return `${parseInt(parts[2], 10)} ${months[parseInt(parts[1], 10) - 1]}`;
                               };
                               if (item.start_date && item.deadline) return `${formatDt(item.start_date)} - ${formatDt(item.deadline)}`;
                               if (item.deadline) return `Due ${formatDt(item.deadline)}`;
-                              if (item.start_date) return formatDt(item.start_date);
+                              if (item.start_date) return `From ${formatDt(item.start_date)}`;
                               return '';
                             })()}
                           </Text>
                         </View>
                       )}
+                      
+                      <Text style={[styles.xpText, { color: colors.accent }]}>+{effectiveXp * categories.length} XP</Text>
                       
                       {overdueDays > 0 && !isCompleted && (
                         <View style={[styles.recurrenceBadge, { backgroundColor: colors.coral + '22' }]}>
@@ -480,7 +560,7 @@ export default function TasksScreen() {
                 
                 {/* Subtask Controls for Parent Tasks */}
                 {!item.parent_id && (
-                  <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 12, justifyContent: 'space-between', borderTopWidth: 1, borderTopColor: colors.border, paddingTop: 12 }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 8, justifyContent: 'space-between', borderTopWidth: 1, borderTopColor: colors.border, paddingTop: 8 }}>
                     {tasks.some(t => t.parent_id === item.id) ? (
                       <TouchableOpacity onPress={() => toggleExpand(item.id)} style={{ flexDirection: 'row', alignItems: 'center' }}>
                         {expandedTasks.includes(item.id) ? <ChevronDown color={colors.textSecondary} size={16} /> : <ChevronRight color={colors.textSecondary} size={16} />}
@@ -725,19 +805,20 @@ const styles = StyleSheet.create({
   },
   filterRow: {
     flexDirection: 'row',
-    gap: 6,
+    gap: 8,
+    paddingBottom: 4,
     marginBottom: Spacing.md,
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
   },
   filterTab: {
     paddingHorizontal: 10,
-    paddingVertical: 6,
+    paddingVertical: 5,
     borderWidth: 2,
     borderColor: 'transparent',
+    borderRadius: Radius.sm,
   },
   filterText: {
     ...Typography.caption,
+    fontSize: 11,
   },
   emptyState: {
     padding: Spacing.xl,
@@ -748,32 +829,33 @@ const styles = StyleSheet.create({
   },
   emptyText: { ...Typography.body, textAlign: 'center' },
   taskCard: {
-    borderRadius: Radius.lg,
-    padding: Spacing.md,
+    borderRadius: Radius.md,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
   },
-  checkCol: { marginRight: 10, paddingTop: 2 },
+  checkCol: { marginRight: 8, paddingTop: 1 },
   taskBody: { flex: 1 },
-  taskTitle: { ...Typography.body, marginBottom: 4 },
-  taskMeta: { flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap' },
+  taskTitle: { ...Typography.bodySmall, fontFamily: 'Poppins_600SemiBold', marginBottom: 4 },
+  taskMeta: { flexDirection: 'row', alignItems: 'center', gap: 4, flexWrap: 'wrap' },
   categoryBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 3,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: Radius.full,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: Radius.sm,
   },
-  categoryText: { ...Typography.caption },
+  categoryText: { ...Typography.caption, fontSize: 10 },
   recurrenceBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 3,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: Radius.full,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: Radius.sm,
   },
-  recurrenceText: { ...Typography.caption },
-  xpText: { ...Typography.caption },
+  recurrenceText: { ...Typography.caption, fontSize: 10 },
+  xpText: { ...Typography.caption, fontSize: 10 },
   archiveAction: {
     justifyContent: 'center',
     alignItems: 'center',

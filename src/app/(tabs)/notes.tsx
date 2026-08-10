@@ -239,7 +239,7 @@ export default function NotesScreen() {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.bg, paddingTop: Math.max(insets.top, 24) + 16 }}>
+    <View style={{ flex: 1, backgroundColor: colors.bg, paddingTop: Math.max(insets.top, 16) }}>
 
       <View style={styles.container}>
         <FlatList

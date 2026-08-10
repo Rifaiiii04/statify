@@ -14,6 +14,7 @@ import { useThemeContext } from '@/context/theme-context';
 import { Task, StatCategory } from '@/db/schema';
 import { getScheduledTasks, getActiveTasks, toggleTask } from '@/db/repositories/task-repository';
 import { addXp, removeXp, logActivity, removeActivity, getUserStats } from '@/db/repositories/stats-repository';
+import { getTaskActiveStatus } from '@/utils/task-utils';
 
 const CATEGORY_ICON_MAP: Record<string, React.ComponentType<any>> = {
   Physical: Dumbbell,
@@ -102,26 +103,8 @@ export default function ScheduleScreen() {
     const todayDayOfWeek = todayDateObj.getDay();
 
     const tTasks = activeTasks.filter(t => {
-      // Ignore subtasks here if needed, or include them? Usually we don't show subtasks at root level
       if (t.parent_id) return false;
-
-      // 1. Calendar tasks
-      if (t.start_date || t.deadline) {
-        const startStr = (t.start_date || t.created_at).split('T')[0];
-        const endStr = (t.deadline || startStr).split('T')[0];
-        return today >= startStr && today <= endStr;
-      }
-      
-      // 2. No calendar tasks, use recurrence
-      if (t.recurrence === 'daily') return true;
-      if (t.recurrence === 'once') return true; // Always show until done, calculate overdue
-      if (t.recurrence === 'specific_days') {
-        try {
-          const days = JSON.parse(t.recurrence_days || '[]');
-          return days.includes(todayDayOfWeek);
-        } catch { return false; }
-      }
-      return false;
+      return getTaskActiveStatus(t, today).isActive;
     });
     
     setTodayTasks(tTasks);
@@ -223,6 +206,11 @@ export default function ScheduleScreen() {
     const handleToggle = async () => {
       if (item.is_system) {
         Alert.alert('System Quest', 'This is an automatic daily quest. Edit your budget in the Money tab.');
+        return;
+      }
+      const activeStatus = getTaskActiveStatus(item, today);
+      if (!activeStatus.isActive && !item.completed) {
+        Alert.alert('Task Inactive', activeStatus.reason || 'This task is not active for this date.');
         return;
       }
       try {
